@@ -38,8 +38,8 @@
   - [ ] `[ ]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`).
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Initialize FastAPI / WebSocket backend server.
-  - [ ] `[ ]` Define standard JSON data schemas (`Survivor`, `DronePose`, `RiskScore`, `NetworkNode`).
+  - [x] `[DONE]` Initialize FastAPI AI Inference service & NestJS main backend.
+  - [ ] `[/]` Define standard Mongoose schemas (`Drone`, `Observation`, and nested types).
   - [ ] `[ ]` Set up mock / dummy detection generator pushing live data over WebSockets.
   - [ ] `[ ]` Establish ROS 2 node bridge to ingest Gazebo telemetry topics into backend.
 
