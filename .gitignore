@@ -2,6 +2,12 @@
 # Ground-Zero Git Ignore Configuration
 # ==============================================================================
 
+# Environment & Secrets (Keep .env.example tracked)
+.env
+.env.*
+!.env.example
+*.local
+
 # ROS 2 & Colcon Build Artifacts
 build/
 install/
@@ -10,8 +16,9 @@ simulation/build/
 simulation/install/
 simulation/log/
 COLCON_IGNORE
+*.log
 
-# Python Artifacts
+# Python Artifacts & Virtual Environments
 __pycache__/
 *.py[cod]
 *$py.class
@@ -25,6 +32,8 @@ venv-ardupilot/
 *env/
 *venv/
 build/
+ai_service/.venv/
+ai_service/env/
 develop-eggs/
 dist/
 downloads/
@@ -42,18 +51,21 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
 
-# Node.js / Digital Twin Frontend
+# Node.js / NestJS Backend & Digital Twin Frontend
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+backend/node_modules/
+backend/dist/
 dist/
 dist-ssr/
 out/
 .next/
-*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.turbo/
 
 # IDEs & System Files
 .vscode/
@@ -67,7 +79,7 @@ Desktop.ini
 *.swo
 *~
 
-# Temporary / Scratch Files
+# Temporary & Scratch Files
 scratch/
 tmp/
 *.tmp
