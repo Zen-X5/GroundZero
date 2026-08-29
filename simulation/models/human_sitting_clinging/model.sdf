@@ -3,9 +3,6 @@
   <model name="human_sitting_clinging">
     <static>true</static>
     <link name="body_link">
-      <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
-        <temperature>310.0</temperature>
-      </plugin>
       <!-- 3D Volumetric Humanoid Mesh with Photorealistic Texture -->
       <visual name="survivor_mesh">
         <pose>0 0 0 0 0 0</pose>
@@ -16,16 +13,9 @@
           </mesh>
         </geometry>
         <material>
-          <ambient>0.90 0.18 0.12 1.0</ambient>
-          <diffuse>0.95 0.22 0.15 1.0</diffuse>
-          <emissive>0.35 0.15 0.05 1.0</emissive>
-          <pbr>
-            <metal>
-              <albedo_map>materials/textures/survivor_sitting.png</albedo_map>
-              <roughness>0.5</roughness>
-              <metalness>0.0</metalness>
-            </metal>
-          </pbr>
+          <ambient>0.95 0.15 0.10 1.0</ambient>
+          <diffuse>0.95 0.15 0.10 1.0</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
         </material>
       </visual>
 

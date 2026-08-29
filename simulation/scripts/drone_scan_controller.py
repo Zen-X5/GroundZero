@@ -40,8 +40,8 @@ class DroneScanController(Node):
                 'pos': [0.0, 0.0, 0.0],
                 'yaw': 0.0,
                 'waypoints': self.generate_orbit_waypoints([
-                    {'center': [155.0, 28.5], 'radius': 12.0, 'altitude': 8.0}, # Building 1
-                    {'center': [148.0, 74.0], 'radius': 12.0, 'altitude': 8.0}  # Building 2
+                    {'center': [155.0, 32.0], 'radius': 16.0, 'altitude': 11.5}, # Clear orbital view of Building 1 Apartments
+                    {'center': [148.0, 75.0], 'radius': 16.0, 'altitude': 15.5}  # Clear orbital view of Building 2 Commercial Tower
                 ]),
                 'current_wp_idx': 0,
                 'pub': self.create_publisher(Twist, '/drone_3/cmd_vel', 10),

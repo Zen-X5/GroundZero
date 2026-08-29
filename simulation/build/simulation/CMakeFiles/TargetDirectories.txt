@@ -1,9 +1,0 @@
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/uninstall.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/simulation_uninstall.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/test.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/edit_cache.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/list_install_components.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/install.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/install/local.dir
-/mnt/c/Users/Hp/Desktop/Hackathon/GroundZero/simulation/build/simulation/CMakeFiles/install/strip.dir

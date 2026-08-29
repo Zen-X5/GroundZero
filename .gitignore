@@ -61,11 +61,13 @@ backend/dist/
 frontend/node_modules/
 frontend/dist/
 frontend/.next/
+frontend/.vite/
 frontend/out/
 dist/
 dist-ssr/
 out/
 .next/
+.vite/
 *.tsbuildinfo
 next-env.d.ts
 npm-debug.log*

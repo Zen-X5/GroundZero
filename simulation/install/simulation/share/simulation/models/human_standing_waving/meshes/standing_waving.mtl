@@ -1,7 +1,0 @@
-newmtl SurvivorMat
-Ka 0.60 0.27 0.06
-Kd 1.00 0.45 0.10
-Ks 0.2 0.2 0.2
-d 1.0
-illum 2
-map_Kd ../materials/textures/survivor_waving.png
