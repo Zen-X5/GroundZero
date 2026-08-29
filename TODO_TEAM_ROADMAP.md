@@ -15,7 +15,7 @@
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
 | **2. Multi-Spectral Perception** | 3 multi-sensor drones with RGB optical & thermal camera & autonomous search flight. `[DONE]` | **Multi-Spectral Fusion:** YOLOv8 posture + FLIR heat extraction + Bayesian confidence ($85\%-98\%$) + Ray-projected GPS ground coordinates + NestJS push. `[DONE]` | Dual-Stream Multi-Spectral HUD view (RGB + FLIR split), live badges, and Explainable AI reasoning cards. `[DONE]` | Multi-spectral survivor verification with 0 false alarms | `[DONE]` |
-| **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[PENDING]` |
+| **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. `[DONE]` | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[DONE]` |
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
 | **6. Disaster Dynamics** | Introduce changing flood levels, blocked routes, drone failure/battery loss, etc. | Recalculate risk and priorities dynamically as conditions change. | Live alerts: CRITICAL / HIGH / MEDIUM, timeline of events. | System adapts instead of following a fixed script | `[PENDING]` |
@@ -80,10 +80,10 @@
 *Goal: Swarm autonomously divides search sectors, avoids collisions, and fuses multi-drone observations.*
 
 - **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Scale simulation up to 5–10 active autonomous drones.
-  - [ ] `[ ]` Implement autonomous sector allocation (Grid partitioning / Voronoi coverage).
-  - [ ] `[ ]` Implement inter-drone collision avoidance and minimum distance buffers.
-  - [ ] `[ ]` Simulate peer-to-peer radio packet exchange between drones.
+  - [x] `[DONE]` Scale simulation up to 5–10 active autonomous drones.
+  - [x] `[DONE]` Implement autonomous sector allocation (Grid partitioning / Voronoi coverage).
+  - [x] `[DONE]` Implement inter-drone collision avoidance and minimum distance buffers.
+  - [x] `[DONE]` Simulate peer-to-peer radio packet exchange between drones.
 
 - **Sahid (AI & Intelligence):**
   - [x] `[x]` Build multi-drone spatial-temporal fusion: merge overlapping detections of the same survivor into a single verified target.
