@@ -6,6 +6,8 @@ import { BuildingCards } from './components/BuildingCards';
 import { NetworkStatus } from './components/NetworkStatus';
 import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
+import { TacticalDisasterMap } from './components/TacticalDisasterMap';
+import { MultiSpectralHUD } from './components/MultiSpectralHUD';
 import { getSocket } from '../lib/services/socket';
 import {
   useGetDronesQuery,
@@ -14,10 +16,13 @@ import {
   useGetBuildingsQuery,
 } from '../lib/store/apiSlice';
 import { Survivor, SystemAlert } from '../lib/types';
+import { Map, Camera, Radio } from 'lucide-react';
 
 export function App() {
   const [connected, setConnected] = useState(false);
   const [selectedSurvivor, setSelectedSurvivor] = useState<Survivor | null>(null);
+  const [centerTab, setCenterTab] = useState<'MAP' | 'HUD' | 'SWARM'>('MAP');
+  const [activeDrone, setActiveDrone] = useState<string>('drone_2');
 
   // RTK Query Hooks with Automated Tag Caching & WebSocket Streaming
   const { data: drones = [] } = useGetDronesQuery();
@@ -90,7 +95,7 @@ export function App() {
   const criticalCount = survivors.filter((s) => s.riskScore >= 80).length;
 
   return (
-    <div style={{ maxWidth: '1680px', margin: '0 auto', padding: '16px 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ maxWidth: '1720px', margin: '0 auto', padding: '16px 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
       {/* Top Command Bar */}
       <Header
@@ -100,8 +105,8 @@ export function App() {
         dronesCount={drones.length}
       />
 
-      {/* Main Grid Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr 340px', gap: '16px', flex: 1 }}>
+      {/* Main Grid Command Center */}
+      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr 340px', gap: '16px', flex: 1 }}>
 
         {/* Left Column: Prioritized Rescue Queue */}
         <div style={{ height: 'calc(100vh - 120px)' }}>
@@ -111,18 +116,83 @@ export function App() {
           />
         </div>
 
-        {/* Center Column: Swarm Telemetry & Building Openings */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: 'calc(100vh - 120px)' }}>
-          <div style={{ flex: '1 1 50%' }}>
-            <DroneGrid drones={drones} />
+        {/* Center Column: Interactive Tactical Map / Multi-Spectral HUD / Building Openings */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: 'calc(100vh - 120px)' }}>
+
+          {/* Center Pane Tab Controls */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              className="btn-cyber"
+              onClick={() => setCenterTab('MAP')}
+              style={{
+                background: centerTab === 'MAP' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
+                borderColor: centerTab === 'MAP' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
+                color: centerTab === 'MAP' ? '#fff' : 'var(--text-muted)',
+                fontSize: '0.78rem',
+                padding: '6px 14px',
+              }}
+            >
+              <Map size={14} /> Tactical Map (2D Grid)
+            </button>
+
+            <button
+              className="btn-cyber"
+              onClick={() => setCenterTab('HUD')}
+              style={{
+                background: centerTab === 'HUD' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
+                borderColor: centerTab === 'HUD' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
+                color: centerTab === 'HUD' ? '#fff' : 'var(--text-muted)',
+                fontSize: '0.78rem',
+                padding: '6px 14px',
+              }}
+            >
+              <Camera size={14} /> Multi-Spectral Live HUD
+            </button>
+
+            <button
+              className="btn-cyber"
+              onClick={() => setCenterTab('SWARM')}
+              style={{
+                background: centerTab === 'SWARM' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
+                borderColor: centerTab === 'SWARM' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
+                color: centerTab === 'SWARM' ? '#fff' : 'var(--text-muted)',
+                fontSize: '0.78rem',
+                padding: '6px 14px',
+              }}
+            >
+              <Radio size={14} /> Swarm Telemetry Nodes
+            </button>
           </div>
-          <div style={{ flex: '1 1 50%' }}>
+
+          {/* Dynamic Center Pane Content */}
+          <div style={{ flex: '1 1 55%', minHeight: '340px' }}>
+            {centerTab === 'MAP' && (
+              <TacticalDisasterMap
+                drones={drones}
+                survivors={survivors}
+                onSelectSurvivor={(s) => setSelectedSurvivor(s)}
+              />
+            )}
+            {centerTab === 'HUD' && (
+              <MultiSpectralHUD
+                activeDrone={activeDrone}
+                onSelectDrone={(d) => setActiveDrone(d)}
+              />
+            )}
+            {centerTab === 'SWARM' && (
+              <DroneGrid drones={drones} />
+            )}
+          </div>
+
+          {/* Lower Center: Building Void Inspections */}
+          <div style={{ flex: '1 1 45%', minHeight: '260px' }}>
             <BuildingCards buildings={buildings} />
           </div>
+
         </div>
 
         {/* Right Column: MANET Mesh Network & Live Alerts */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: 'calc(100vh - 120px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: 'calc(100vh - 120px)' }}>
           <div style={{ flex: '1 1 45%' }}>
             <NetworkStatus topology={topology} />
           </div>

@@ -77,19 +77,19 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
                 <div>
                   <span style={{ color: 'var(--text-dim)' }}>Alt / Z: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{drone.position.z.toFixed(1)}m</strong>
+                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.position?.z ?? 8.0).toFixed(1)}m</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-dim)' }}>Speed: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{drone.speed.toFixed(1)} m/s</strong>
+                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.speed ?? 1.8).toFixed(1)} m/s</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-dim)' }}>Sector: </span>
-                  <strong style={{ color: 'var(--accent-cyan)' }}>{drone.sector}</strong>
+                  <strong style={{ color: 'var(--accent-cyan)' }}>{drone.assignedSector || drone.sector || 'SECTOR_A'}</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-dim)' }}>Yaw: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{drone.heading.toFixed(0)}°</strong>
+                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.heading ?? 0).toFixed(0)}°</strong>
                 </div>
               </div>
 
@@ -97,18 +97,18 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem' }}>
                 {/* Battery */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Battery size={14} color={getBatteryColor(drone.batteryPercentage)} />
+                  <Battery size={14} color={getBatteryColor(drone.batteryPercentage ?? 90)} />
                   <span style={{ color: 'var(--text-muted)' }}>Battery:</span>
-                  <strong style={{ color: getBatteryColor(drone.batteryPercentage), fontFamily: 'var(--font-mono)' }}>
-                    {drone.batteryPercentage.toFixed(0)}%
+                  <strong style={{ color: getBatteryColor(drone.batteryPercentage ?? 90), fontFamily: 'var(--font-mono)' }}>
+                    {(drone.batteryPercentage ?? 90).toFixed(0)}%
                   </strong>
                 </div>
 
                 {/* Sensor Chips */}
                 <div style={{ display: 'flex', gap: '4px' }}>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: drone.sensors?.rgbActive ? 'rgba(0,240,255,0.15)' : 'rgba(255,255,255,0.04)', color: drone.sensors?.rgbActive ? 'var(--accent-cyan)' : 'var(--text-dim)' }}>RGB</span>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: drone.sensors?.thermalActive ? 'rgba(255,42,85,0.15)' : 'rgba(255,255,255,0.04)', color: drone.sensors?.thermalActive ? 'var(--accent-crimson)' : 'var(--text-dim)' }}>IR</span>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: drone.sensors?.lidarActive ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.04)', color: drone.sensors?.lidarActive ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>LiDAR</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,240,255,0.15)', color: 'var(--accent-cyan)' }}>RGB</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(255,42,85,0.15)', color: 'var(--accent-crimson)' }}>IR</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,255,136,0.15)', color: 'var(--accent-emerald)' }}>LiDAR</span>
                 </div>
               </div>
 
