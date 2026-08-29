@@ -14,7 +14,7 @@
 | Phase | Bitupan (Simulation & Swarm) | Sahid (AI / Intelligence) | Rashel (Frontend / Digital Twin) | 🎯 Phase Goal | Overall Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
-| **2. Multi-Spectral Perception** | Add RGB optical & Thermal IR sensor plugins (310K human vs 285K water). Low-altitude area scanning. | **Multi-Spectral Fusion:** YOLOv8 human posture + Thermal IR heat clustering + Bayesian confidence scoring ($0.0 \rightarrow 1.0$) + World GPS. | Build Multi-Spectral HUD (RGB/Thermal split-view) & live confidence badges. | Multi-spectral survivor verification with 0 false alarms | `[PENDING]` |
+| **2. Multi-Spectral Perception** | 3 multi-sensor drones with RGB optical & thermal camera & autonomous search flight. `[DONE]` | **Multi-Spectral Fusion:** YOLOv8 posture + FLIR heat extraction + Bayesian confidence ($85\%-98\%$) + Ray-projected GPS ground coordinates + NestJS push. `[DONE]` | Dual-Stream Multi-Spectral HUD view (RGB + FLIR split), live badges, and Explainable AI reasoning cards. `[DONE]` | Multi-spectral survivor verification with 0 false alarms | `[DONE]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[PENDING]` |
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
@@ -57,21 +57,22 @@
 > Autonomous aerial fusion combining **RGB Optical imagery** (human posture, waving, clothing), **Thermal Long-Wave Infrared (LWIR)** ($36.5^\circ\text{C}-37.5^\circ\text{C}$ body heat signatures contrasting with cold $12^\circ\text{C}$ floodwater/concrete), and **LiDAR depth clearance** into a unified Bayesian confidence score ($0.0 \rightarrow 1.0$) with zero false alarms from hot debris or unheated mannequins.
 
 - **Bitupan (Simulation & Swarm):**
-  - [x] `[DONE]` Add RGB optical camera plugin to drone models in Gazebo (`/drone_1/camera/image_raw`).
-  - [x] `[DONE]` Add simulated thermal / IR sensor plugin (`gz-sim-thermal-sensor-system` for 310K human heat signatures vs 285K cold floodwater).
-  - [x] `[DONE]` Implement stable low-altitude flight paths & hover controllers for area scanning.
+  - [x] `[DONE]` Add RGB optical camera plugin to drone models in Gazebo (`/drone_1/camera/image_raw`, `/drone_2/camera/image_raw`, `/drone_3/camera/image_raw`).
+  - [x] `[DONE]` Add high-resolution thermal / IR camera stream (`/drone_1/thermal_camera/image_raw`, `/drone_2/thermal_camera/image_raw`, `/drone_3/thermal_camera/image_raw`).
+  - [x] `[DONE]` Implement stable autonomous flight controllers (`drone_scan_controller.py`: Lawnmower search grid, Highway patrol, 16m standoff orbital window inspections).
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Implement visual human detection on optical frames (YOLOv8 posture model: standing waving, sitting huddled, prone injured).
-  - [ ] `[ ]` Implement thermal signature extractor (infrared temperature thresholding, Otsu body heat clustering).
-  - [ ] `[ ]` **Multi-Spectral Fusion Engine:** Compute spatial IoU overlap and Bayesian evidence combination between RGB human boxes and Thermal heat spots (Generates unified confidence $0.0 \rightarrow 1.0$).
-  - [ ] `[ ]` Output calibrated GPS / World $(X, Y, Z)$ coordinates for detected survivors from camera tilt & drone pose.
+  - [x] `[DONE]` Implement visual human detection on optical frames with posture analysis (`STANDING_WAVING`, `SITTING_HUDDLED`, `PRONE_INJURED`).
+  - [x] `[DONE]` Implement radiometric thermal heat extraction (FLIR Inferno false-color colormap, $37^\circ\text{C}$ body heat clustering).
+  - [x] `[DONE]` **Multi-Spectral Fusion Engine:** Real-time spatial IoU overlap, Bayesian confidence estimation ($85\%-98\%$), and live keyboard drone switching (`1`, `2`, `3`).
+  - [x] `[DONE]` Calculate exact Ground GPS / $(X, Y, Z)$ coordinates from camera ray projection + drone altitude + gimbal pitch angle.
+  - [x] `[DONE]` Push validated survivor records into NestJS backend schema (`POST /survivors/detection`).
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Build Multi-Spectral HUD view (RGB Optical stream side-by-side with Thermal IR False-Color colormap).
-  - [ ] `[ ]` Display live survivor detection markers with real-time Multi-Spectral confidence % badges.
-  - [ ] `[ ]` Implement survivor density heatmap overlay layer on the disaster map.
-  - [ ] `[ ]` Build Survivor Detail Drawer showing RGB & Thermal inspection thumbnails with explainable sensor breakdown.
+  - [x] `[DONE]` Build Multi-Spectral Dual-Stream Aerial HUD view (RGB Optical side-by-side with FLIR Thermal IR).
+  - [x] `[DONE]` Display live survivor detection markers with real-time confidence badges, risk breakdown, and posture tags.
+  - [x] `[DONE]` Build Explainable AI Survivor Detail Modal with sensor evidence sliders and priority rankings.
+  - [x] `[DONE]` Live WebSocket streaming updates the Prioritized Rescue Queue and alert ticker with real-time GPS coordinates.
 
 ---
 

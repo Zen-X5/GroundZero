@@ -69,6 +69,19 @@ export class SurvivorsService {
     await this.recalculatePriorityQueue();
 
     try {
+      const gateway = require('../gateway/events.gateway').getGlobalEventsGateway();
+      if (gateway) {
+        gateway.broadcastSurvivorUpdate(payload);
+        gateway.broadcastAlert({
+          level: payload.riskScore >= 80 ? 'CRITICAL' : 'WARNING',
+          title: `Survivor Target: ${payload.code}`,
+          message: `Detected at (${payload.globalPosition?.x || 0}m, ${payload.globalPosition?.y || 0}m) in ${payload.sector} - Risk ${payload.riskScore}`,
+          timestamp: Date.now(),
+        });
+      }
+    } catch (_) {}
+
+    try {
       return await this.survivorModel
         .findOneAndUpdate(
           { code: dto.code },

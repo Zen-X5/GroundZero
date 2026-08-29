@@ -12,6 +12,12 @@ import { DronesService } from '../drones/drones.service';
 import { SurvivorsService } from '../survivors/survivors.service';
 import { NetworkService } from '../network/network.service';
 
+let globalGatewayInstance: EventsGateway | null = null;
+
+export function getGlobalEventsGateway(): EventsGateway | null {
+  return globalGatewayInstance;
+}
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -27,7 +33,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly dronesService: DronesService,
     private readonly survivorsService: SurvivorsService,
     private readonly networkService: NetworkService,
-  ) {}
+  ) {
+    globalGatewayInstance = this;
+  }
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected to Ground-Zero WebSocket: ${client.id}`);

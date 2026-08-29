@@ -50,6 +50,13 @@ export class DronesService {
     this.memoryDrones.set(dto.callsign, payload as Drone);
 
     try {
+      const gateway = require('../gateway/events.gateway').getGlobalEventsGateway();
+      if (gateway) {
+        gateway.broadcastDroneTelemetry(payload);
+      }
+    } catch (_) {}
+
+    try {
       return await this.droneModel
         .findOneAndUpdate(
           { callsign: dto.callsign },
