@@ -31,11 +31,14 @@
 ### 📍 Phase 1: Foundation (End-to-End Vertical Pipeline)
 *Goal: Gazebo ➔ ROS 2 ➔ AI/Backend ➔ Web Dashboard working with mock/preliminary data.*
 
-- **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Setup Gazebo disaster world with terrain, roads, baseline flood plane, and basic buildings.
-  - [ ] `[ ]` Spawn 2–3 quadcopter drone models in Gazebo.
-  - [ ] `[ ]` Configure ROS 2 publishers for drone telemetry (`/drone_1/pose`, `/drone_2/pose`).
-  - [ ] `[ ]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`).
+- **Bitupan (Simulation & Disaster Environment):**
+  - [x] `[DONE]` Setup Pure Gazebo Harmonic disaster world with terrain, elevated dry highway, and dynamic PBR flowing flood water (`simulation/worlds/disaster_night_world.sdf`).
+  - [x] `[DONE]` Model damaged urban structures (Apartments, Commercial Tower, Warehouse, Clinic, Bank) with realistic multi-floor window voids and glass openings.
+  - [x] `[DONE]` Generate 3D volumetric photorealistic human models (`human_standing_waving`, `human_sitting_clinging`, `human_prone_injured`) with PBR textures and thermal emissivity.
+  - [x] `[DONE]` Populate 35+ realistic disaster survivors across roofs, window voids, road verges, and high tree branches in Sector A, Sector B flanks, and Sector C.
+  - [ ] `[ ]` Spawn 2–3 quadcopter drone models in Gazebo (`simulation/models/rescue_drone/`).
+  - [ ] `[ ]` Configure ROS 2 publishers for drone telemetry (`/drone_1/odometry`, `/drone_2/odometry`, `/drone_3/odometry`).
+  - [ ] `[ ]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`, `/drone_2/camera/image_raw`, `/drone_3/camera/image_raw`).
 
 - **Sahid (AI & Intelligence):**
   - [ ] `[ ]` Initialize FastAPI / WebSocket backend server.

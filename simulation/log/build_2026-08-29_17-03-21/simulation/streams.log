@@ -1,0 +1,41 @@
+[0.079s] Invoking command in '/mnt/d/GroundZero/simulation/build/simulation': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /mnt/d/GroundZero/simulation/build/simulation -- -j12 -l12
+[0.170s] -- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.652s] -- Configuring done (0.5s)
+[0.902s] -- Generating done (0.2s)
+[1.000s] -- Build files have been written to: /mnt/d/GroundZero/simulation/build/simulation
+[1.022s] Invoked command in '/mnt/d/GroundZero/simulation/build/simulation' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /mnt/d/GroundZero/simulation/build/simulation -- -j12 -l12
+[1.044s] Invoking command in '/mnt/d/GroundZero/simulation/build/simulation': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /mnt/d/GroundZero/simulation/build/simulation
+[1.062s] -- Install configuration: ""
+[1.075s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/worlds
+[1.097s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/worlds/disaster_night_world.sdf
+[1.181s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models
+[1.204s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone
+[1.229s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone/model.config
+[1.249s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone/model.sdf
+[1.266s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/launch
+[1.288s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/launch/disaster_sim.launch.py
+[1.353s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/config
+[1.373s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/config/ros_gz_bridge.yaml
+[1.385s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media
+[1.406s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials
+[1.435s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials/scripts
+[1.471s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials/scripts/water.material
+[1.542s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials/textures
+[1.576s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials/textures/water_diffuse.png
+[1.656s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/media/materials/textures/water_normal.png
+[1.716s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/package_run_dependencies/simulation
+[1.735s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/parent_prefix_path/simulation
+[1.783s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/ament_prefix_path.sh
+[1.796s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/ament_prefix_path.dsv
+[1.805s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/path.sh
+[1.819s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/path.dsv
+[1.831s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.bash
+[1.842s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.sh
+[1.854s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.zsh
+[1.868s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.dsv
+[1.883s] -- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/package.dsv
+[1.939s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/packages/simulation
+[1.954s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/cmake/simulationConfig.cmake
+[1.965s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/cmake/simulationConfig-version.cmake
+[1.981s] -- Up-to-date: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/package.xml
+[1.988s] Invoked command in '/mnt/d/GroundZero/simulation/build/simulation' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /mnt/d/GroundZero/simulation/build/simulation

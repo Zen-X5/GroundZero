@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="disaster_night_world">
+    <!-- ==================== PHYSICS & SIMULATION SETTINGS ==================== -->
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+
+    <!-- Gazebo Harmonic Core Plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+
+    <!-- ==================== NIGHT ATMOSPHERE & LIGHTING ==================== -->
+    <atmosphere type="adiabatic" />
+    
+    <scene>
+      <ambient>0.06 0.08 0.16 1.0</ambient> <!-- Deep midnight blue ambient -->
+      <background>0.01 0.02 0.05 1.0</background> <!-- Night sky -->
+      <shadows>true</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- High-Altitude Moonlight -->
+    <light type="directional" name="moonlight">
+      <cast_shadows>true</cast_shadows>
+      <pose>100 50 150 0.5 0.3 0</pose>
+      <diffuse>0.35 0.42 0.58 1.0</diffuse>
+      <specular>0.5 0.55 0.7 1.0</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.3 -0.2 -0.9</direction>
+    </light>
+
+    <!-- Red Hazard Emergency Strobe (Urban Sector C) -->
+    <light type="point" name="emergency_beacon_c">
+      <cast_shadows>false</cast_shadows>
+      <pose>165 45 10 0 0 0</pose>
+      <diffuse>0.95 0.15 0.1 1.0</diffuse>
+      <specular>0.7 0.1 0.1 1.0</specular>
+      <attenuation>
+        <range>55</range>
+        <constant>0.2</constant>
+        <linear>0.03</linear>
+        <quadratic>0.006</quadratic>
+      </attenuation>
+    </light>
+
+    <!-- Amber Road Hazard Beacon (Sector B) -->
+    <light type="point" name="emergency_beacon_b">
+      <cast_shadows>false</cast_shadows>
+      <pose>100 50 6 0 0 0</pose>
+      <diffuse>0.85 0.55 0.1 1.0</diffuse>
+      <specular>0.6 0.35 0.1 1.0</specular>
+      <attenuation>
+        <range>40</range>
+        <constant>0.25</constant>
+        <linear>0.05</linear>
+        <quadratic>0.008</quadratic>
+      </attenuation>
+    </light>
+
+    <!-- Blue Emergency Beacon on Floating Rescue Boat (Sector A) -->
+    <light type="point" name="boat_beacon_a">
+      <cast_shadows>false</cast_shadows>
+      <pose>35 60 4 0 0 0</pose>
+      <diffuse>0.1 0.4 0.95 1.0</diffuse>
+      <specular>0.2 0.5 0.9 1.0</specular>
+      <attenuation>
+        <range>30</range>
+        <constant>0.3</constant>
+        <linear>0.06</linear>
+        <quadratic>0.01</quadratic>
+      </attenuation>
+    </light>
+
+    <!-- ==================== BASE GROUND PLANE ==================== -->
+    <model name="ground_plane">
+      <static>true</static>
+      <pose>100 50 0 0 0 0</pose>
+      <link name="ground_link">
+        <collision name="ground_collision"><geometry><plane><normal>0 0 1</normal><size>240 140</size></plane></geometry></collision>
+        <visual name="ground_visual">
+          <geometry><plane><normal>0 0 1</normal><size>240 140</size></plane></geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1.0</ambient>
+            <diffuse>0.14 0.14 0.14 1.0</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- SEAMLESS FLOOD WATER SYSTEM (SECTOR A, SECTOR C & ROAD FLANKING)     -->
+    <!-- No gaps/margins anywhere - water flows everywhere except on the road -->
+    <!-- ==================================================================== -->
+
+    <!-- Sector A Deep Flood Lake (x: -10m -> 70m, y: -10m -> 110m, z = 1.0m) -->
+    <model name="flood_water_sector_a">
+      <static>true</static>
+      <pose>35 50 1.0 0 0 0</pose>
+      <link name="water_link">
+        <visual name="surface">
+          <geometry><box><size>70 120 0.06</size></box></geometry>
+          <material>
+            <ambient>0.05 0.35 0.55 0.85</ambient>
+            <diffuse>0.08 0.50 0.72 0.85</diffuse>
+            <specular>0.9 0.95 1.0 0.95</specular>
+            <pbr>
+              <metal>
+                <albedo_map>materials/textures/water_diffuse.png</albedo_map>
+                <normal_map>materials/textures/water_normal.png</normal_map>
+                <roughness>0.15</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+        <visual name="body"><pose>0 0 -0.5 0 0 0</pose><geometry><box><size>70 120 1.0</size></box></geometry><material><ambient>0.02 0.20 0.38 0.9</ambient><diffuse>0.03 0.26 0.46 0.9</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Sector C Urban Flood Inundation (x: 130m -> 210m, y: -10m -> 110m, z = 1.0m) -->
+    <model name="flood_water_sector_c_urban">
+      <static>true</static>
+      <pose>170 50 1.0 0 0 0</pose>
+      <link name="water_link">
+        <visual name="surface">
+          <geometry><box><size>80 120 0.06</size></box></geometry>
+          <material>
+            <ambient>0.05 0.35 0.55 0.85</ambient>
+            <diffuse>0.08 0.50 0.72 0.85</diffuse>
+            <specular>0.9 0.95 1.0 0.95</specular>
+            <pbr>
+              <metal>
+                <albedo_map>materials/textures/water_diffuse.png</albedo_map>
+                <normal_map>materials/textures/water_normal.png</normal_map>
+                <roughness>0.15</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+        <visual name="body"><pose>0 0 -0.5 0 0 0</pose><geometry><box><size>80 120 1.0</size></box></geometry><material><ambient>0.02 0.20 0.38 0.9</ambient><diffuse>0.03 0.26 0.46 0.9</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Sector B North Side Flood Flank (x: 70m -> 130m, y: 62m -> 110m, z = 1.0m) -->
+    <model name="flood_water_sector_b_north">
+      <static>true</static>
+      <pose>100 86 1.0 0 0 0</pose>
+      <link name="w">
+        <visual name="v">
+          <geometry><box><size>60 48 0.06</size></box></geometry>
+          <material>
+            <ambient>0.05 0.35 0.55 0.85</ambient>
+            <diffuse>0.08 0.50 0.72 0.85</diffuse>
+            <specular>0.9 0.95 1.0 0.95</specular>
+            <pbr>
+              <metal>
+                <albedo_map>materials/textures/water_diffuse.png</albedo_map>
+                <normal_map>materials/textures/water_normal.png</normal_map>
+                <roughness>0.15</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+        <visual name="body"><pose>0 0 -0.5 0 0 0</pose><geometry><box><size>60 48 1.0</size></box></geometry><material><ambient>0.02 0.20 0.38 0.9</ambient><diffuse>0.03 0.26 0.46 0.9</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Sector B South Side Flood Flank (x: 70m -> 130m, y: -10m -> 38m, z = 1.0m) -->
+    <model name="flood_water_sector_b_south">
+      <static>true</static>
+      <pose>100 14 1.0 0 0 0</pose>
+      <link name="w">
+        <visual name="v">
+          <geometry><box><size>60 48 0.06</size></box></geometry>
+          <material>
+            <ambient>0.05 0.35 0.55 0.85</ambient>
+            <diffuse>0.08 0.50 0.72 0.85</diffuse>
+            <specular>0.9 0.95 1.0 0.95</specular>
+            <pbr>
+              <metal>
+                <albedo_map>materials/textures/water_diffuse.png</albedo_map>
+                <normal_map>materials/textures/water_normal.png</normal_map>
+                <roughness>0.15</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+        <visual name="body"><pose>0 0 -0.5 0 0 0</pose><geometry><box><size>60 48 1.0</size></box></geometry><material><ambient>0.02 0.20 0.38 0.9</ambient><diffuse>0.03 0.26 0.46 0.9</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- SECTOR B: ELEVATED DRY HIGHWAY CORRIDOR (NO WATER ON THE ROAD)       -->
+    <!-- Road deck elevated at z = 1.4m (Above the 1.0m water line)           -->
+    <!-- ==================================================================== -->
+
+    <model name="elevated_dry_highway_corridor">
+      <static>true</static>
+      <pose>100 50 0.7 0 0 0</pose>
+      
+      <!-- Elevated Asphalt Embankment Base (60m long, 24m wide from y=38 to y=62) -->
+      <link name="dry_road_embankment">
+        <collision name="col"><geometry><box><size>60 24 1.4</size></box></geometry></collision>
+        <visual name="embankment_vis">
+          <geometry><box><size>60 24 1.4</size></box></geometry>
+          <material><ambient>0.18 0.18 0.18 1.0</ambient><diffuse>0.24 0.24 0.24 1.0</diffuse></material>
+        </visual>
+        <!-- Center Double Yellow Line on Road Deck (At z = 1.41m) -->
+        <visual name="yellow_line">
+          <pose>0 0 0.71 0 0 0</pose>
+          <geometry><box><size>58 0.3 0.01</size></box></geometry>
+          <material><ambient>0.8 0.7 0.1 1.0</ambient><diffuse>0.9 0.8 0.1 1.0</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Concrete Guard Rails on North and South Edge of Highway -->
+      <link name="guardrail_north">
+        <pose>0 11.6 1.0 0 0 0</pose>
+        <visual name="v"><geometry><box><size>60 0.6 0.6</size></box></geometry><material><ambient>0.4 0.4 0.4 1.0</ambient><diffuse>0.5 0.5 0.5 1.0</diffuse></material></visual>
+      </link>
+      <link name="guardrail_south">
+        <pose>0 -11.6 1.0 0 0 0</pose>
+        <visual name="v"><geometry><box><size>60 0.6 0.6</size></box></geometry><material><ambient>0.4 0.4 0.4 1.0</ambient><diffuse>0.5 0.5 0.5 1.0</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Dry Road Obstacles & Abandoned Wrecked Vehicles (On the Dry Highway Deck at z=1.4m) -->
+    <!-- Vehicle 1: Overturned SUV on Dry Road -->
+    <model name="wrecked_suv_1">
+      <static>true</static>
+      <pose>86 44 2.1 2.8 0.2 0.8</pose>
+      <link name="b"><collision name="col"><geometry><box><size>4.5 1.9 1.4</size></box></geometry></collision><visual name="v"><geometry><box><size>4.5 1.9 1.4</size></box></geometry><material><ambient>0.5 0.1 0.1 1.0</ambient><diffuse>0.6 0.15 0.15 1.0</diffuse></material></visual></link>
+    </model>
+    <!-- Vehicle 2: Crushed Sedan on Dry Road -->
+    <model name="wrecked_sedan_2">
+      <static>true</static>
+      <pose>93 54 1.95 0.2 0.3 -0.5</pose>
+      <link name="b"><collision name="col"><geometry><box><size>4.2 1.8 1.1</size></box></geometry></collision><visual name="v"><geometry><box><size>4.2 1.8 1.1</size></box></geometry><material><ambient>0.1 0.2 0.4 1.0</ambient><diffuse>0.15 0.3 0.5 1.0</diffuse></material></visual></link>
+    </model>
+    <!-- Vehicle 3: Delivery Van on Dry Road -->
+    <model name="wrecked_van_3">
+      <static>true</static>
+      <pose>112 40 2.45 -0.3 0.1 1.1</pose>
+      <link name="b"><collision name="col"><geometry><box><size>5.2 2.0 2.1</size></box></geometry></collision><visual name="v"><geometry><box><size>5.2 2.0 2.1</size></box></geometry><material><ambient>0.4 0.4 0.4 1.0</ambient><diffuse>0.5 0.5 0.5 1.0</diffuse></material></visual></link>
+    </model>
+    <!-- Vehicle 4: Shipping Container on Dry Road -->
+    <model name="cargo_container_debris">
+      <static>true</static>
+      <pose>122 56 2.7 0.1 0 0.6</pose>
+      <link name="b"><collision name="col"><geometry><box><size>6.0 2.4 2.6</size></box></geometry></collision><visual name="v"><geometry><box><size>6.0 2.4 2.6</size></box></geometry><material><ambient>0.6 0.2 0.05 1.0</ambient><diffuse>0.7 0.25 0.08 1.0</diffuse></material></visual></link>
+    </model>
+    
+    <!-- Stranded Pickup Truck (On the Dry Road: x=105, y=50, z=2.15) -->
+    <model name="stranded_pickup_truck">
+      <static>true</static>
+      <pose>105 50 2.15 0 0 1.4</pose>
+      <link name="truck"><collision name="col"><geometry><box><size>5.0 2.0 1.5</size></box></geometry></collision><visual name="v"><geometry><box><size>5.0 2.0 1.5</size></box></geometry><material><ambient>0.2 0.4 0.2 1.0</ambient><diffuse>0.25 0.5 0.25 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Concrete Jersey Barriers on Dry Road -->
+    <model name="jersey_barriers_pile"><static>true</static><pose>105 42 1.8 0 0 0.4</pose><link name="b1"><visual name="v"><geometry><box><size>3.0 0.6 0.8</size></box></geometry><material><ambient>0.35 0.35 0.35 1.0</ambient><diffuse>0.45 0.45 0.45 1.0</diffuse></material></visual></link><link name="b2"><pose>1.5 1.2 0.3 0.2 0.4 1.1</pose><visual name="v"><geometry><box><size>3.0 0.6 0.8</size></box></geometry><material><ambient>0.35 0.35 0.35 1.0</ambient><diffuse>0.45 0.45 0.45 1.0</diffuse></material></visual></link></model>
+    <model name="fallen_highway_sign"><static>true</static><pose>116 50 1.6 1.57 0 0.2</pose><link name="t"><visual name="v"><geometry><cylinder><radius>0.25</radius><length>18.0</length></cylinder></geometry><material><ambient>0.3 0.35 0.4 1.0</ambient><diffuse>0.4 0.45 0.5 1.0</diffuse></material></visual></link><link name="s"><pose>0 0 2.0 0 1.57 0</pose><visual name="v"><geometry><box><size>4.0 2.0 0.1</size></box></geometry><material><ambient>0.05 0.4 0.1 1.0</ambient><diffuse>0.08 0.5 0.15 1.0</diffuse></material></visual></link></model>
+
+    <!-- ==================================================================== -->
+    <!-- SECTOR B NORTH FLANK: SUBMERGED HOUSES & TREES (y: 62m -> 110m)      -->
+    <!-- ==================================================================== -->
+
+    <!-- Submerged House 3 (North Flank) -->
+    <model name="submerged_house_north_1">
+      <static>true</static>
+      <pose>86 86 0.4 0 0.08 0.4</pose>
+      <link name="walls"><pose>0 0 1.4 0 0 0</pose><visual name="v"><geometry><box><size>8 6 2.8</size></box></geometry><material><ambient>0.3 0.25 0.2 1.0</ambient><diffuse>0.4 0.35 0.3 1.0</diffuse></material></visual></link>
+      <link name="roof"><pose>0 0 3.0 0 0.25 0</pose><visual name="v"><geometry><box><size>9 7 0.35</size></box></geometry><material><ambient>0.45 0.15 0.15 1.0</ambient><diffuse>0.55 0.2 0.2 1.0</diffuse></material></visual></link>
+      <link name="window"><pose>0 -3.05 1.8 0 0 0</pose><visual name="v"><geometry><box><size>2.5 0.1 1.4</size></box></geometry><material><ambient>0.2 0.4 0.6 0.7</ambient><diffuse>0.25 0.5 0.7 0.7</diffuse></material></visual></link>
+    </model>
+
+    <!-- Submerged House 4 (North Flank) -->
+    <model name="submerged_house_north_2">
+      <static>true</static>
+      <pose>116 88 0.3 0 -0.06 -0.5</pose>
+      <link name="walls"><pose>0 0 1.4 0 0 0</pose><visual name="v"><geometry><box><size>9 7 2.8</size></box></geometry><material><ambient>0.25 0.25 0.28 1.0</ambient><diffuse>0.35 0.35 0.4 1.0</diffuse></material></visual></link>
+      <link name="roof"><pose>0 0 3.0 0 0.25 0</pose><visual name="v"><geometry><box><size>10 8 0.35</size></box></geometry><material><ambient>0.2 0.25 0.4 1.0</ambient><diffuse>0.25 0.3 0.5 1.0</diffuse></material></visual></link>
+      <link name="window"><pose>0 -3.55 1.8 0 0 0</pose><visual name="v"><geometry><box><size>3.0 0.1 1.4</size></box></geometry><material><ambient>0.2 0.4 0.6 0.7</ambient><diffuse>0.25 0.5 0.7 0.7</diffuse></material></visual></link>
+    </model>
+
+    <!-- Flank Oak Tree North 1 -->
+    <model name="flank_tree_north_1">
+      <static>true</static>
+      <pose>78 76 0 0 0 0.6</pose>
+      <link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.42</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="b"><pose>0.7 0.4 4.5 0 0.6 0.4</pose><visual name="v"><geometry><cylinder><radius>0.22</radius><length>2.2</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.2</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+      <link name="c2"><pose>-0.8 -0.5 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.6</radius></sphere></geometry><material><ambient>0.07 0.25 0.11 1.0</ambient><diffuse>0.11 0.39 0.16 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Flank Pine Tree North 2 -->
+    <model name="flank_tree_north_2">
+      <static>true</static>
+      <pose>98 98 0 0 0 -0.7</pose>
+      <link name="t"><pose>0 0 3.2 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.45</radius><length>6.4</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.4</radius></sphere></geometry><material><ambient>0.06 0.24 0.10 1.0</ambient><diffuse>0.10 0.38 0.15 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+      <link name="c2"><pose>0 0 6.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.7</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Flank Tree North 3 -->
+    <model name="flank_tree_north_3">
+      <static>true</static>
+      <pose>122 76 0 0 0 0.9</pose>
+      <link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.4</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="b"><pose>-0.6 0.5 4.5 0 -0.6 0.8</pose><visual name="v"><geometry><cylinder><radius>0.22</radius><length>2.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.1</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- SECTOR B SOUTH FLANK: SUBMERGED HOUSES & TREES (y: -10m -> 38m)      -->
+    <!-- ==================================================================== -->
+
+    <!-- Submerged House 5 (South Flank) -->
+    <model name="submerged_house_south_1">
+      <static>true</static>
+      <pose>86 18 0.4 0 -0.08 -0.3</pose>
+      <link name="walls"><pose>0 0 1.4 0 0 0</pose><visual name="v"><geometry><box><size>8 6 2.8</size></box></geometry><material><ambient>0.3 0.25 0.2 1.0</ambient><diffuse>0.4 0.35 0.3 1.0</diffuse></material></visual></link>
+      <link name="roof"><pose>0 0 3.0 0 0.25 0</pose><visual name="v"><geometry><box><size>9 7 0.35</size></box></geometry><material><ambient>0.45 0.15 0.15 1.0</ambient><diffuse>0.55 0.2 0.2 1.0</diffuse></material></visual></link>
+      <link name="window"><pose>0 3.05 1.8 0 0 0</pose><visual name="v"><geometry><box><size>2.5 0.1 1.4</size></box></geometry><material><ambient>0.2 0.4 0.6 0.7</ambient><diffuse>0.25 0.5 0.7 0.7</diffuse></material></visual></link>
+    </model>
+
+    <!-- Submerged House 6 (South Flank) -->
+    <model name="submerged_house_south_2">
+      <static>true</static>
+      <pose>116 16 0.3 0 0.05 0.6</pose>
+      <link name="walls"><pose>0 0 1.4 0 0 0</pose><visual name="v"><geometry><box><size>9 7 2.8</size></box></geometry><material><ambient>0.25 0.25 0.28 1.0</ambient><diffuse>0.35 0.35 0.4 1.0</diffuse></material></visual></link>
+      <link name="roof"><pose>0 0 3.0 0 0.25 0</pose><visual name="v"><geometry><box><size>10 8 0.35</size></box></geometry><material><ambient>0.2 0.25 0.4 1.0</ambient><diffuse>0.25 0.3 0.5 1.0</diffuse></material></visual></link>
+      <link name="window"><pose>0 3.55 1.8 0 0 0</pose><visual name="v"><geometry><box><size>3.0 0.1 1.4</size></box></geometry><material><ambient>0.2 0.4 0.6 0.7</ambient><diffuse>0.25 0.5 0.7 0.7</diffuse></material></visual></link>
+    </model>
+
+    <!-- Flank Oak Tree South 1 -->
+    <model name="flank_tree_south_1">
+      <static>true</static>
+      <pose>78 24 0 0 0 0.4</pose>
+      <link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.42</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="b"><pose>0.7 0.4 4.5 0 0.6 0.4</pose><visual name="v"><geometry><cylinder><radius>0.22</radius><length>2.2</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.2</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Flank Pine Tree South 2 -->
+    <model name="flank_tree_south_2">
+      <static>true</static>
+      <pose>98 8 0 0 0 -0.5</pose>
+      <link name="t"><pose>0 0 3.2 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.45</radius><length>6.4</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.4</radius></sphere></geometry><material><ambient>0.06 0.24 0.10 1.0</ambient><diffuse>0.10 0.38 0.15 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Flank Tree South 3 -->
+    <model name="flank_tree_south_3">
+      <static>true</static>
+      <pose>122 24 0 0 0 1.1</pose>
+      <link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.4</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="b"><pose>-0.6 -0.4 4.5 0 -0.6 -0.6</pose><visual name="v"><geometry><cylinder><radius>0.22</radius><length>2.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link>
+      <link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.1</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Submerged Car Roof in South Flank (Survivor #38) -->
+    <model name="submerged_car_south_flank">
+      <static>true</static>
+      <pose>105 16 1.05 0.1 0.15 0.8</pose>
+      <link name="b"><collision name="col"><geometry><box><size>4.4 1.8 1.4</size></box></geometry></collision><visual name="v"><geometry><box><size>4.4 1.8 1.4</size></box></geometry><material><ambient>0.5 0.1 0.1 1.0</ambient><diffuse>0.6 0.15 0.15 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- SECTOR A: DEEP FLOOD LAKE, TREES, ROOFS & RAFTS (x: 0m -> 70m)       -->
+    <!-- ==================================================================== -->
+
+    <!-- Realistic Flood Oak 1 with Survivor #1 in Upper Fork (x=18.3, y=32.2, z=4.8) -->
+    <model name="flood_tree_1">
+      <static>true</static>
+      <pose>18 32 0 0 0 0.4</pose>
+      <!-- Main Trunk with PBR Bark -->
+      <link name="trunk">
+        <pose>0 0 3.2 0 0 0</pose>
+        <collision name="col"><geometry><cylinder><radius>0.45</radius><length>6.4</length></cylinder></geometry></collision>
+        <visual name="v">
+          <geometry><cylinder><radius>0.45</radius><length>6.4</length></cylinder></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1.0</ambient>
+            <diffuse>0.4 0.28 0.18 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+      <!-- Heavy Angled Branch 1 (Survivor perch!) -->
+      <link name="branch_1">
+        <pose>0.8 0.4 4.5 0 0.65 0.5</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.24</radius><length>2.4</length></cylinder></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1.0</ambient>
+            <diffuse>0.4 0.28 0.18 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+      <!-- Heavy Angled Branch 2 -->
+      <link name="branch_2">
+        <pose>-0.7 -0.5 4.8 0 -0.55 -0.6</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.22</radius><length>2.2</length></cylinder></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1.0</ambient>
+            <diffuse>0.4 0.28 0.18 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+      <!-- Multi-Cluster Organic Foliage Canopy with PBR Leaf Shading -->
+      <link name="canopy_main">
+        <pose>0 0 6.2 0 0 0</pose>
+        <visual name="v">
+          <geometry><sphere><radius>2.2</radius></sphere></geometry>
+          <material>
+            <ambient>0.08 0.28 0.12 1.0</ambient>
+            <diffuse>0.12 0.42 0.18 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+      <link name="canopy_sub_1">
+        <pose>1.2 0.6 5.8 0 0 0</pose>
+        <visual name="v">
+          <geometry><sphere><radius>1.7</radius></sphere></geometry>
+          <material>
+            <ambient>0.06 0.24 0.10 1.0</ambient>
+            <diffuse>0.10 0.38 0.15 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+      <link name="canopy_sub_2">
+        <pose>-1.1 -0.7 6.0 0 0 0</pose>
+        <visual name="v">
+          <geometry><sphere><radius>1.6</radius></sphere></geometry>
+          <material>
+            <ambient>0.07 0.26 0.11 1.0</ambient>
+            <diffuse>0.11 0.40 0.16 1.0</diffuse>
+            <pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Survivor #1 perched on Branch 1 of Tree 1 - replaced by modular survivor_01 below -->
+
+    <!-- Realistic Flood Pine 2 in Lake (x=50, y=75) -->
+    <model name="flood_tree_2">
+      <static>true</static>
+      <pose>50 75 0 0 0 -0.8</pose>
+      <link name="trunk">
+        <pose>0 0 3.4 0 0 0</pose>
+        <visual name="v"><geometry><cylinder><radius>0.48</radius><length>6.8</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual>
+      </link>
+      <link name="branch">
+        <pose>-0.6 0.5 4.8 0 -0.6 0.8</pose>
+        <visual name="v"><geometry><cylinder><radius>0.22</radius><length>2.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual>
+      </link>
+      <link name="canopy_tier1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.4</radius></sphere></geometry><material><ambient>0.06 0.24 0.10 1.0</ambient><diffuse>0.10 0.38 0.15 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+      <link name="canopy_tier2"><pose>0 0 6.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.8</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+      <link name="canopy_top"><pose>0 0 7.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.1</radius></sphere></geometry><material><ambient>0.09 0.30 0.14 1.0</ambient><diffuse>0.13 0.45 0.20 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- Dense Realistic Trees 3 through 10 in Flood Lake with Multi-tier Canopies -->
+    <model name="flood_tree_3"><static>true</static><pose>12 65 0 0 0 0.7</pose><link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.4</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.1</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link><link name="c2"><pose>0.8 0.4 5.2 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.5</radius></sphere></geometry><material><ambient>0.07 0.25 0.11 1.0</ambient><diffuse>0.11 0.39 0.16 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_4"><static>true</static><pose>28 82 0 0 0 -0.5</pose><link name="t"><pose>0 0 3.2 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.44</radius><length>6.4</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.3</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link><link name="c2"><pose>-0.9 0.5 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.6</radius></sphere></geometry><material><ambient>0.07 0.25 0.11 1.0</ambient><diffuse>0.11 0.39 0.16 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_5"><static>true</static><pose>38 52 0 0 0 1.2</pose><link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.42</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.2</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link><link name="c2"><pose>0.7 -0.8 5.2 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.5</radius></sphere></geometry><material><ambient>0.07 0.25 0.11 1.0</ambient><diffuse>0.11 0.39 0.16 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_6"><static>true</static><pose>55 25 0 0 0 -0.8</pose><link name="t"><pose>0 0 2.8 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.38</radius><length>5.6</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.2 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.0</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_7"><static>true</static><pose>10 15 0 0 0 0.3</pose><link name="t"><pose>0 0 3.2 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.42</radius><length>6.4</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.3</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_8"><static>true</static><pose>62 60 0 0 0 -1.1</pose><link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.4</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.1</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_9"><static>true</static><pose>24 18 0 0 0 0.8</pose><link name="t"><pose>0 0 3.0 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.4</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.3 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.0</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+    <model name="flood_tree_10"><static>true</static><pose>46 40 0 0 0 -0.4</pose><link name="t"><pose>0 0 3.2 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.45</radius><length>6.4</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual></link><link name="c1"><pose>0 0 5.6 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.2</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link></model>
+
+    <!-- Submerged House 1 -->
+    <model name="submerged_house_1">
+      <static>true</static>
+      <pose>38 22 0.8 0 0.12 0.3</pose>
+      <link name="walls"><pose>0 0 1.5 0 0 0</pose><visual name="v"><geometry><box><size>9 7 3</size></box></geometry><material><ambient>0.3 0.25 0.2 1.0</ambient><diffuse>0.4 0.35 0.3 1.0</diffuse></material></visual></link>
+      <link name="roof"><pose>0 0 3.3 0 0.3 0</pose><collision name="col"><geometry><box><size>10 8 0.35</size></box></geometry></collision><visual name="v"><geometry><box><size>10 8 0.35</size></box></geometry><material><ambient>0.45 0.15 0.15 1.0</ambient><diffuse>0.55 0.2 0.2 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Submerged House 2 -->
+    <model name="submerged_house_2"><static>true</static><pose>22 80 0.2 0 0.05 -0.6</pose><link name="walls"><pose>0 0 1.2 0 0 0</pose><visual name="v"><geometry><box><size>8 6 2.4</size></box></geometry><material><ambient>0.25 0.25 0.25 1.0</ambient><diffuse>0.3 0.3 0.3 1.0</diffuse></material></visual></link><link name="roof"><pose>0 0 2.6 0 0.25 0</pose><visual name="v"><geometry><box><size>9 7 0.3</size></box></geometry><material><ambient>0.2 0.2 0.35 1.0</ambient><diffuse>0.25 0.25 0.45 1.0</diffuse></material></visual></link></model>
+
+    <!-- Drifting Inflatable Rescue Boat -->
+    <model name="rescue_boat_raft">
+      <static>true</static>
+      <pose>35 60 1.2 0 0 0.5</pose>
+      <link name="hull"><visual name="v"><geometry><box><size>4.5 2.2 0.5</size></box></geometry><material><ambient>0.8 0.3 0.05 1.0</ambient><diffuse>0.9 0.4 0.08 1.0</diffuse></material></visual></link>
+      <link name="seats"><pose>0 0 0.3 0 0 0</pose><visual name="v"><geometry><box><size>3.5 1.6 0.2</size></box></geometry><material><ambient>0.2 0.2 0.2 1.0</ambient><diffuse>0.3 0.3 0.3 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Floating Pallet, Barrels & Poles -->
+    <model name="floating_pallet_1"><static>true</static><pose>25 48 1.02 0 0.05 0.4</pose><link name="r"><visual name="v"><geometry><box><size>3.0 2.0 0.15</size></box></geometry><material><ambient>0.35 0.22 0.1 1.0</ambient><diffuse>0.45 0.3 0.15 1.0</diffuse></material></visual></link></model>
+    <model name="floating_barrel_1"><static>true</static><pose>42 62 1.05 1.57 0 0.8</pose><link name="b"><visual name="v"><geometry><cylinder><radius>0.3</radius><length>0.9</length></cylinder></geometry><material><ambient>0.7 0.5 0.05 1.0</ambient><diffuse>0.8 0.6 0.1 1.0</diffuse></material></visual></link></model>
+    <model name="submerged_utility_pole_1"><static>true</static><pose>30 45 0 0 0.1 0</pose><link name="pole"><pose>0 0 3.5 0 0 0</pose><visual name="v"><geometry><cylinder><radius>0.15</radius><length>7.0</length></cylinder></geometry><material><ambient>0.25 0.18 0.1 1.0</ambient><diffuse>0.3 0.2 0.12 1.0</diffuse></material></visual></link></model>
+
+    <!-- ==================================================================== -->
+    <!-- SECTOR C: FLOODED URBAN STREETS & BUILDINGS WITH WINDOW OPENINGS     -->
+    <!-- Buildings positioned at ground level (z = 0) in 1.0m floodwater      -->
+    <!-- ==================================================================== -->
+
+    <!-- Building 1: Residential Apartments with Multi-Floor Window Voids -->
+    <model name="urban_building_1_apartments">
+      <static>true</static>
+      <pose>155 32 0 0 0 0</pose>
+      <link name="slab_0"><pose>0 0 0.25 0 0 0</pose><collision name="col"><geometry><box><size>16 14 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>16 14 0.5</size></box></geometry><material><ambient>0.25 0.25 0.25 1.0</ambient><diffuse>0.35 0.35 0.35 1.0</diffuse></material></visual></link>
+      <link name="wall_north"><pose>0 6.8 5.0 0 0 0</pose><collision name="col"><geometry><box><size>16 0.5 10.0</size></box></geometry></collision><visual name="v"><geometry><box><size>16 0.5 10.0</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <link name="wall_east"><pose>7.8 0 5.0 0 0 0</pose><collision name="col"><geometry><box><size>0.5 14 10.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.5 14 10.0</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <link name="wall_west"><pose>-7.8 0 5.0 0 0 0</pose><collision name="col"><geometry><box><size>0.5 14 10.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.5 14 10.0</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <!-- South Wall with 2 Large Window Voids (Floor 1 & Floor 2) -->
+      <link name="wall_south_lower"><pose>0 -6.8 1.8 0 0 0</pose><visual name="v"><geometry><box><size>16 0.5 3.6</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <link name="wall_south_fl1_left"><pose>-5.5 -6.8 5.6 0 0 0</pose><visual name="v"><geometry><box><size>5.0 0.5 4.0</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <link name="wall_south_fl1_right"><pose>5.5 -6.8 5.6 0 0 0</pose><visual name="v"><geometry><box><size>5.0 0.5 4.0</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <!-- Window Sills and Broken Frame Ledges -->
+      <link name="window_frame_1"><pose>0 -6.8 3.8 0 0 0</pose><visual name="v"><geometry><box><size>6.0 0.2 0.15</size></box></geometry><material><ambient>0.5 0.5 0.5 1.0</ambient><diffuse>0.6 0.6 0.6 1.0</diffuse></material></visual></link>
+      <link name="window_frame_2"><pose>0 -6.8 7.4 0 0 0</pose><visual name="v"><geometry><box><size>6.0 0.2 0.15</size></box></geometry><material><ambient>0.5 0.5 0.5 1.0</ambient><diffuse>0.6 0.6 0.6 1.0</diffuse></material></visual></link>
+      <link name="slab_1"><pose>0 0 3.6 0 0 0</pose><visual name="v"><geometry><box><size>15 13 0.3</size></box></geometry><material><ambient>0.22 0.22 0.22 1.0</ambient><diffuse>0.3 0.3 0.3 1.0</diffuse></material></visual></link>
+      <link name="roof_slab"><pose>0 0 10.2 0.12 0.06 0</pose><collision name="col"><geometry><box><size>17 15 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>17 15 0.5</size></box></geometry><material><ambient>0.26 0.26 0.26 1.0</ambient><diffuse>0.34 0.34 0.34 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Building 2: Commercial Tower with Glass Openings & Windows -->
+    <model name="urban_building_2_commercial">
+      <static>true</static>
+      <pose>148 75 0 0 0 0</pose>
+      <link name="main_tower"><pose>0 0 7.0 0 0 0</pose><collision name="col"><geometry><box><size>14 14 14.0</size></box></geometry></collision><visual name="v"><geometry><box><size>14 14 14.0</size></box></geometry><material><ambient>0.18 0.25 0.32 1.0</ambient><diffuse>0.24 0.34 0.44 1.0</diffuse></material></visual></link>
+      <!-- Multi-tier Window Glass Band with Openings -->
+      <link name="glass_window_band_1"><pose>0 -7.05 4.0 0 0 0</pose><visual name="v"><geometry><box><size>10 0.1 2.5</size></box></geometry><material><ambient>0.1 0.4 0.6 0.6</ambient><diffuse>0.15 0.5 0.7 0.6</diffuse><specular>0.9 0.9 0.9 1.0</specular></material></visual></link>
+      <link name="glass_window_band_2"><pose>0 -7.05 8.0 0 0 0</pose><visual name="v"><geometry><box><size>10 0.1 2.5</size></box></geometry><material><ambient>0.1 0.4 0.6 0.6</ambient><diffuse>0.15 0.5 0.7 0.6</diffuse><specular>0.9 0.9 0.9 1.0</specular></material></visual></link>
+      <!-- Interior Slabs for Multiple Floors -->
+      <link name="floor_slab_1"><pose>0 0 3.5 0 0 0</pose><visual name="v"><geometry><box><size>13 13 0.3</size></box></geometry><material><ambient>0.2 0.2 0.2 1.0</ambient><diffuse>0.3 0.3 0.3 1.0</diffuse></material></visual></link>
+      <link name="floor_slab_2"><pose>0 0 7.0 0 0 0</pose><visual name="v"><geometry><box><size>13 13 0.3</size></box></geometry><material><ambient>0.2 0.2 0.2 1.0</ambient><diffuse>0.3 0.3 0.3 1.0</diffuse></material></visual></link>
+      <link name="rooftop_deck"><pose>0 0 14.2 0 0 0</pose><visual name="v"><geometry><box><size>12 12 0.4</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Building 3: Collapsed Rubble (Zero Survivors - Negative Control in Water) -->
+    <model name="urban_collapsed_rubble_empty">
+      <static>true</static>
+      <pose>180 30 0 0 0 0</pose>
+      <link name="slab_1"><pose>0 0 1.2 0.3 0.4 0.8</pose><collision name="col"><geometry><box><size>14 10 0.6</size></box></geometry></collision><visual name="v"><geometry><box><size>14 10 0.6</size></box></geometry><material><ambient>0.32 0.32 0.32 1.0</ambient><diffuse>0.4 0.4 0.4 1.0</diffuse></material></visual></link>
+      <link name="slab_2"><pose>2 1 2.5 -0.2 0.5 -0.3</pose><collision name="col"><geometry><box><size>11 8 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>11 8 0.5</size></box></geometry><material><ambient>0.3 0.3 0.3 1.0</ambient><diffuse>0.38 0.38 0.38 1.0</diffuse></material></visual></link>
+      <link name="slab_3"><pose>-2 -1 3.4 0.4 -0.3 1.2</pose><visual name="v"><geometry><box><size>8 6 0.5</size></box></geometry><material><ambient>0.28 0.28 0.28 1.0</ambient><diffuse>0.35 0.35 0.35 1.0</diffuse></material></visual></link>
+      <link name="rebar_1"><pose>3 2 4.0 0.5 0.2 0</pose><visual name="v"><geometry><cylinder><radius>0.06</radius><length>4.0</length></cylinder></geometry><material><ambient>0.5 0.2 0.1 1.0</ambient><diffuse>0.6 0.25 0.1 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Building 4: Industrial Warehouse (Flooded ground) with Window Voids -->
+    <model name="urban_building_4_warehouse">
+      <static>true</static>
+      <pose>182 72 0 0 0 -0.2</pose>
+      <link name="main_hall"><pose>0 0 4.0 0 0 0</pose><collision name="col"><geometry><box><size>18 12 8.0</size></box></geometry></collision><visual name="v"><geometry><box><size>18 12 8.0</size></box></geometry><material><ambient>0.35 0.28 0.22 1.0</ambient><diffuse>0.45 0.38 0.3 1.0</diffuse></material></visual></link>
+      <link name="open_bay_door"><pose>-9.05 0 2.5 0 0 0</pose><visual name="v"><geometry><box><size>0.2 5.0 5.0</size></box></geometry><material><ambient>0.1 0.1 0.1 1.0</ambient><diffuse>0.15 0.15 0.15 1.0</diffuse></material></visual></link>
+      <link name="collapsed_metal_roof"><pose>-4 0 7.8 0 0.35 0</pose><visual name="v"><geometry><box><size>10 13 0.2</size></box></geometry><material><ambient>0.25 0.3 0.35 1.0</ambient><diffuse>0.3 0.4 0.5 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Building 5: Clinic / Medical Center (Flooded base) with Windows -->
+    <model name="urban_building_5_clinic">
+      <static>true</static>
+      <pose>138 48 0 0 0 0.4</pose>
+      <link name="structure"><pose>0 0 3.0 0 0 0</pose><collision name="col"><geometry><box><size>10 10 6.0</size></box></geometry></collision><visual name="v"><geometry><box><size>10 10 6.0</size></box></geometry><material><ambient>0.35 0.35 0.35 1.0</ambient><diffuse>0.45 0.45 0.45 1.0</diffuse></material></visual></link>
+      <!-- Clinic Front Window Opening -->
+      <link name="clinic_window"><pose>0 -5.05 2.5 0 0 0</pose><visual name="v"><geometry><box><size>4.0 0.1 2.0</size></box></geometry><material><ambient>0.2 0.5 0.7 0.7</ambient><diffuse>0.25 0.6 0.8 0.7</diffuse><specular>0.9 0.9 0.9 1.0</specular></material></visual></link>
+      <link name="cross_v"><pose>0 -5.05 4.5 0 0 0</pose><visual name="v"><geometry><box><size>0.6 0.1 1.8</size></box></geometry><material><ambient>0.9 0.1 0.1 1.0</ambient><diffuse>0.9 0.1 0.1 1.0</diffuse></material></visual></link>
+      <link name="cross_h"><pose>0 -5.05 4.5 0 0 0</pose><visual name="v"><geometry><box><size>1.8 0.1 0.6</size></box></geometry><material><ambient>0.9 0.1 0.1 1.0</ambient><diffuse>0.9 0.1 0.1 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Building 6: Partially Collapsed Bank with Balcony Windows -->
+    <model name="urban_building_6_bank">
+      <static>true</static>
+      <pose>168 54 0 0 0 -0.5</pose>
+      <link name="bldg"><pose>0 0 3.5 0 0 0</pose><collision name="col"><geometry><box><size>12 10 7.0</size></box></geometry></collision><visual name="v"><geometry><box><size>12 10 7.0</size></box></geometry><material><ambient>0.3 0.32 0.35 1.0</ambient><diffuse>0.4 0.42 0.45 1.0</diffuse></material></visual></link>
+      <!-- Balcony Window Opening -->
+      <link name="bank_window"><pose>0 -5.05 4.8 0 0 0</pose><visual name="v"><geometry><box><size>6.0 0.1 2.2</size></box></geometry><material><ambient>0.15 0.35 0.55 0.6</ambient><diffuse>0.2 0.45 0.65 0.6</diffuse><specular>0.9 0.9 0.9 1.0</specular></material></visual></link>
+      <link name="cracked_balcony"><pose>0 -5.2 3.8 0.15 0 0</pose><visual name="v"><geometry><box><size>8 1.4 0.3</size></box></geometry><material><ambient>0.25 0.25 0.25 1.0</ambient><diffuse>0.35 0.35 0.35 1.0</diffuse></material></visual></link>
+    </model>
+
+    <!-- Urban Debris Clusters & Streetlights in Flooded Streets -->
+    <model name="urban_debris_cluster_1"><static>true</static><pose>160 52 0.4 0 0 0.6</pose><link name="d"><visual name="v"><geometry><box><size>4.5 3.0 0.8</size></box></geometry><material><ambient>0.25 0.25 0.25 1.0</ambient><diffuse>0.35 0.35 0.35 1.0</diffuse></material></visual></link></model>
+    <model name="urban_debris_cluster_2"><static>true</static><pose>170 58 0.5 0.2 0.3 1.1</pose><link name="d"><visual name="v"><geometry><box><size>5.0 4.0 1.0</size></box></geometry><material><ambient>0.28 0.28 0.28 1.0</ambient><diffuse>0.38 0.38 0.38 1.0</diffuse></material></visual></link></model>
+    <model name="urban_tree_1">
+      <static>true</static>
+      <pose>140 30 0 0 0 0.5</pose>
+      <link name="t">
+        <pose>0 0 3.0 0 0 0</pose>
+        <visual name="v"><geometry><cylinder><radius>0.38</radius><length>6.0</length></cylinder></geometry><material><ambient>0.3 0.2 0.12 1.0</ambient><diffuse>0.4 0.28 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/bark_diffuse.png</albedo_map><normal_map>materials/textures/bark_normal.png</normal_map><roughness>0.8</roughness></metal></pbr></material></visual>
+      </link>
+      <link name="c1"><pose>0 0 5.4 0 0 0</pose><visual name="v"><geometry><sphere><radius>2.1</radius></sphere></geometry><material><ambient>0.08 0.28 0.12 1.0</ambient><diffuse>0.12 0.42 0.18 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+      <link name="c2"><pose>0.7 0.5 5.2 0 0 0</pose><visual name="v"><geometry><sphere><radius>1.5</radius></sphere></geometry><material><ambient>0.07 0.25 0.11 1.0</ambient><diffuse>0.11 0.39 0.16 1.0</diffuse><pbr><metal><albedo_map>materials/textures/leaves_diffuse.png</albedo_map><normal_map>materials/textures/leaves_normal.png</normal_map><roughness>0.6</roughness></metal></pbr></material></visual></link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- MULTI-OCCUPANCY DIVERSE SURVIVORS (INSIDE HOUSES & WINDOW VOIDS)     -->
+    <!-- Some buildings have 3 people, some 2, some 1                         -->
+    <!-- ==================================================================== -->
+
+    <!-- ========== SECTOR A: FLOOD LAKE SURVIVORS (10 Locations) ========== -->
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_01_tree1</name><pose>18.8 32.5 4.5 0 0 0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_02_tree2</name><pose>49.4 75.5 4.8 0 0 -0.8</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_03_tree4</name><pose>27.4 82.2 4.8 0 0 -0.4</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_04_tree5</name><pose>38.2 52.4 4.6 0 0 1.1</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_05_tree8</name><pose>62.2 59.6 4.7 0 0 -1.0</pose></include>
+    
+    <!-- Submerged House 1 (2 Survivors: 1 on roof waving, 1 clinging to chimney) -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_06a_house1_roof</name><pose>38.5 22.8 3.8 0 0.3 0.2</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_06b_house1_ledge</name><pose>37.2 21.5 3.5 0 0.2 -0.5</pose></include>
+
+    <!-- Submerged House 2 (2 Survivors: 1 prone on roof, 1 waving from window) -->
+    <include><uri>model://human_prone_injured</uri><name>survivor_07a_house2_roof</name><pose>22.0 80.0 2.8 0 0.25 -0.6</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_07b_house2_window</name><pose>23.5 78.5 2.4 0 0 0.8</pose></include>
+
+    <!-- Rescue Raft & Pallet -->
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_08a_rescue_boat</name><pose>35.2 60.0 1.5 0 0 0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_08b_rescue_boat</name><pose>34.2 59.5 1.5 0 0 -1.2</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_09_floating_pallet</name><pose>25.0 48.0 1.12 0 0 0.4</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_10_lake_verge</name><pose>10.5 40.0 1.05 0 0 0.8</pose></include>
+
+    <!-- ========== SECTOR B: DRY HIGHWAY CORRIDOR (10 Locations) ========== -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_11_pickup_roof</name><pose>105.0 50.0 2.9 0 0 1.4</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_12_wrecked_suv</name><pose>86.2 44.0 2.1 0 0 0.8</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_13_cargo_container</name><pose>122.0 56.0 4.0 0 0 0.6</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_14_jersey_barrier</name><pose>104.5 41.5 1.45 0 0 0.4</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_15_highway_sign</name><pose>115.5 49.0 1.45 0 0 0.2</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_16_road_east_verge</name><pose>126.0 46.0 1.45 0 0 0.0</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_17_road_west_verge</name><pose>76.0 54.0 1.45 0 0 0.0</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_18_crushed_sedan</name><pose>96.0 55.0 2.1 0 0 -0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_19_guardrail_north</name><pose>90.0 61.0 1.45 0 0 -1.57</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_20_guardrail_south</name><pose>110.0 39.0 1.45 0 0 1.57</pose></include>
+
+    <!-- ========== SECTOR B FLANKS: NORTH & SOUTH HOUSES & TREES ========== -->
+    <!-- North Flank Houses & Trees -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_b_n_house3_roof</name><pose>86.0 86.0 3.4 0 0.25 0.4</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_n_house3_window</name><pose>86.0 83.2 1.8 0 0 -1.57</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_b_n_house4_roof</name><pose>116.0 88.0 3.4 0 0.25 -0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_n_house4_window</name><pose>116.0 84.8 1.8 0 0 -1.57</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_n_tree1</name><pose>78.6 76.4 4.8 0 0 0.6</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_n_tree2</name><pose>98.0 98.0 5.5 0 0 -0.7</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_n_tree3</name><pose>121.5 76.5 4.8 0 0 0.9</pose></include>
+
+    <!-- South Flank Houses & Trees -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_b_s_house5_roof</name><pose>86.0 18.0 3.4 0 0.25 -0.3</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_s_house5_window</name><pose>86.0 20.8 1.8 0 0 1.57</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_b_s_house6_roof</name><pose>116.0 16.0 3.4 0 0.25 0.6</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_s_house6_window</name><pose>116.0 19.2 1.8 0 0 1.57</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_s_tree4</name><pose>78.6 24.4 4.8 0 0 0.4</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_s_tree5</name><pose>98.0 8.0 5.5 0 0 -0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_b_s_tree6</name><pose>121.5 23.6 4.8 0 0 1.1</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_b_s_car_roof</name><pose>105.0 16.0 2.0 0 0 0.8</pose></include>
+
+    <!-- ========== SECTOR C: URBAN CITY & WINDOW VOIDS (Multi-Occupancy!) ========== -->
+    
+    <!-- Building 1: Apartments (3 Survivors: 1 waving at window void, 1 sitting, 1 injured prone) -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_21a_apt_window_waving</name><pose>154.5 26.5 3.8 0 0 0.0</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_21b_apt_window_sitting</name><pose>156.5 27.5 3.8 0 0 -0.8</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_21c_apt_floor_prone</name><pose>153.2 29.5 3.8 0 0 0.4</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_22_apt_balcony</name><pose>162.0 34.0 3.9 0 0 -1.57</pose></include>
+
+    <!-- Building 2: Commercial Tower (3 Survivors: 1 roof deck, 2 inside glass window band) -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_23a_commercial_roof</name><pose>148.0 74.0 14.4 0 0 1.57</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_23b_commercial_window_fl2</name><pose>147.5 69.2 7.2 0 0 0.0</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_23c_commercial_window_fl1</name><pose>150.0 69.2 3.6 0 0 -0.5</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_24_commercial_ledge</name><pose>142.5 75.0 7.2 0 0 0.0</pose></include>
+
+    <!-- Building 4: Industrial Warehouse (3 Survivors inside open bay & collapsed roof) -->
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_25a_warehouse_porch</name><pose>174.0 70.0 1.8 0 0 0.0</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_25b_warehouse_bay_waving</name><pose>176.5 72.0 1.8 0 0 1.2</pose></include>
+    <include><uri>model://human_prone_injured</uri><name>survivor_26_warehouse_roof_void</name><pose>179.0 73.0 8.0 0 0.35 0.0</pose></include>
+
+    <!-- Building 5: Clinic (2 Survivors: 1 at entrance, 1 looking through clinic window) -->
+    <include><uri>model://human_standing_waving</uri><name>survivor_27a_clinic_entrance</name><pose>138.0 44.5 1.8 0 0 1.57</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_27b_clinic_window</name><pose>139.5 44.5 1.8 0 0 1.57</pose></include>
+
+    <!-- Building 6: Bank (2 Survivors: 1 on cracked balcony, 1 inside window opening) -->
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_28a_bank_balcony</name><pose>168.0 50.0 4.1 0 0 1.57</pose></include>
+    <include><uri>model://human_standing_waving</uri><name>survivor_28b_bank_window</name><pose>166.5 50.0 4.1 0 0 1.57</pose></include>
+
+    <!-- Street Rubble & Trees -->
+    <include><uri>model://human_prone_injured</uri><name>survivor_29_urban_debris_pile</name><pose>161.0 53.0 1.6 0 0 0.6</pose></include>
+    <include><uri>model://human_sitting_clinging</uri><name>survivor_30_urban_tree</name><pose>140.0 30.0 4.6 0 0 0.5</pose></include>
+
+  </world>
+</sdf>
+

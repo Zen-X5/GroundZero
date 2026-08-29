@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <model name="human_prone_injured">
+    <static>true</static>
+    <link name="body_link">
+      <!-- 3D Volumetric Humanoid Mesh with Photorealistic Texture -->
+      <visual name="survivor_mesh">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://human_prone_injured/meshes/prone_injured.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.90 0.90 0.12 1.0</ambient>
+          <diffuse>0.95 0.95 0.15 1.0</diffuse>
+          <emissive>0.40 0.20 0.05 1.0</emissive>
+          <pbr>
+            <metal>
+              <albedo_map>materials/textures/survivor_prone.png</albedo_map>
+              <roughness>0.5</roughness>
+              <metalness>0.0</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <!-- Physical 3D Collision Volume -->
+      <collision name="col">
+        <pose>0.15 0 0.15 0 0 0</pose>
+        <geometry><box><size>1.6 0.8 0.4</size></box></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

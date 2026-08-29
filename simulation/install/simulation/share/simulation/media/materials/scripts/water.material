@@ -1,0 +1,34 @@
+material GroundZero/FlowingWater
+{
+  technique
+  {
+    pass
+    {
+      scene_blend alpha_blend
+      depth_write off
+      cull_hardware none
+      cull_software none
+
+      ambient 0.05 0.25 0.4 0.75
+      diffuse 0.08 0.45 0.65 0.75
+      specular 0.9 0.95 1.0 1.0 64.0
+
+      // Primary wave layer with forward current flow
+      texture_unit
+      {
+        texture water_diffuse.png
+        scroll_anim 0.04 0.015
+        scale 0.05 0.05
+      }
+
+      // Secondary cross-ripple layer for realistic wave turbulence
+      texture_unit
+      {
+        texture water_normal.png
+        scroll_anim -0.025 0.035
+        scale 0.08 0.08
+        colour_op add
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Configuring done (4.3s)
+-- Generating done (0.2s)
+-- Build files have been written to: /mnt/d/GroundZero/simulation/build/simulation
+-- Install configuration: ""
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/worlds
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/worlds/disaster_night_world.sdf
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone/model.config
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/models/rescue_drone/model.sdf
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/launch
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/launch/disaster_sim.launch.py
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/config
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/config/ros_gz_bridge.yaml
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/package_run_dependencies/simulation
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/parent_prefix_path/simulation
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/ament_prefix_path.sh
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/ament_prefix_path.dsv
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/path.sh
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/environment/path.dsv
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.bash
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.sh
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.zsh
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/local_setup.dsv
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/package.dsv
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/ament_index/resource_index/packages/simulation
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/cmake/simulationConfig.cmake
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/cmake/simulationConfig-version.cmake
+-- Installing: /mnt/d/GroundZero/simulation/install/simulation/share/simulation/package.xml

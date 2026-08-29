@@ -1,0 +1,7 @@
+newmtl SurvivorMat
+Ka 0.57 0.57 0.09
+Kd 0.95 0.95 0.15
+Ks 0.2 0.2 0.2
+d 1.0
+illum 2
+map_Kd ../materials/textures/survivor_prone.png

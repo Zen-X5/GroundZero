@@ -1,0 +1,9 @@
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/uninstall.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/simulation_uninstall.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/test.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/edit_cache.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/rebuild_cache.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/list_install_components.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/install.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/install/local.dir
+/mnt/d/GroundZero/simulation/build/simulation/CMakeFiles/install/strip.dir
