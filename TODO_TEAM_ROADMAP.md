@@ -13,7 +13,7 @@
 
 | Phase | Bitupan (Simulation & Swarm) | Sahid (AI / Intelligence) | Rashel (Frontend / Digital Twin) | 🎯 Phase Goal | Overall Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard skeleton: map, survivor markers, risk queue, basic panels. | Backend ➔ AI ➔ Web working end-to-end | `[IN PROGRESS]` |
+| **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
 | **2. Drone Perception** | Add RGB/thermal camera simulation, drone movement and basic flight control. | Implement person detection + thermal/RGB fusion. Generate survivor coordinates/confidence. | Display live detections and survivor locations on map. | Drones can actually find potential survivors | `[PENDING]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[PENDING]` |
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
@@ -49,10 +49,10 @@
   - [x] `[DONE]` Build FastAPI AI microservice (`ai_service/`) with RGB+Thermal fusion and explainable risk calculation.
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Initialize high-tech dark mode dashboard interface with glassmorphic cards.
-  - [ ] `[ ]` Integrate live 2D/3D map (Leaflet / MapLibre / Three.js).
-  - [ ] `[ ]` Connect WebSocket client to backend service.
-  - [ ] `[ ]` Render real-time moving drone markers and preliminary survivor beacon pins on map.
+  - [x] `[DONE]` Initialize high-tech dark mode dashboard interface with glassmorphic cards (`frontend/`).
+  - [x] `[DONE]` Connect WebSocket client to NestJS backend service (`ws://localhost:3000`).
+  - [x] `[DONE]` Implement Dynamic Prioritized Rescue Queue, Swarm Telemetry Grid, Building Opening Inspector, and Live Incident Log Feed.
+
 
 ---
 
