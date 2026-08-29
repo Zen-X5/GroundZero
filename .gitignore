@@ -21,6 +21,9 @@ env/
 venv/
 .venv/
 ENV/
+venv-ardupilot/
+*env/
+*venv/
 build/
 develop-eggs/
 dist/

@@ -1,6 +1,0 @@
-Invoking command in '/mnt/d/GroundZero/simulation/build/simulation': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /mnt/d/GroundZero/simulation -DCMAKE_INSTALL_PREFIX=/mnt/d/GroundZero/simulation/install/simulation
-Invoked command in '/mnt/d/GroundZero/simulation/build/simulation' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /mnt/d/GroundZero/simulation -DCMAKE_INSTALL_PREFIX=/mnt/d/GroundZero/simulation/install/simulation
-Invoking command in '/mnt/d/GroundZero/simulation/build/simulation': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /mnt/d/GroundZero/simulation/build/simulation -- -j12 -l12
-Invoked command in '/mnt/d/GroundZero/simulation/build/simulation' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /mnt/d/GroundZero/simulation/build/simulation -- -j12 -l12
-Invoking command in '/mnt/d/GroundZero/simulation/build/simulation': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /mnt/d/GroundZero/simulation/build/simulation
-Invoked command in '/mnt/d/GroundZero/simulation/build/simulation' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /mnt/d/GroundZero/simulation/build/simulation
