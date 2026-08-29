@@ -13,7 +13,7 @@
 
 | Phase | Bitupan (Simulation & Swarm) | Sahid (AI / Intelligence) | Rashel (Frontend / Digital Twin) | 🎯 Phase Goal | Overall Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| **1. Foundation** | Build Gazebo disaster env (buildings, roads, flood zones). Spawn 2–3 drones. Publish pose + camera data. | Set up AI backend/API. Define detection format (survivor, location, confidence, risk). Start with dummy detections. | Build dashboard skeleton: map, drone markers, survivor markers, basic panels. | Gazebo ➔ AI ➔ Web working end-to-end | `[PENDING]` |
+| **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard skeleton: map, survivor markers, risk queue, basic panels. | Backend ➔ AI ➔ Web working end-to-end | `[IN PROGRESS]` |
 | **2. Drone Perception** | Add RGB/thermal camera simulation, drone movement and basic flight control. | Implement person detection + thermal/RGB fusion. Generate survivor coordinates/confidence. | Display live detections and survivor locations on map. | Drones can actually find potential survivors | `[PENDING]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[PENDING]` |
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
@@ -40,11 +40,13 @@
   - [ ] `[ ]` Configure ROS 2 publishers for drone telemetry (`/drone_1/odometry`, `/drone_2/odometry`, `/drone_3/odometry`).
   - [ ] `[ ]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`, `/drone_2/camera/image_raw`, `/drone_3/camera/image_raw`).
 
-- **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Initialize FastAPI / WebSocket backend server.
-  - [ ] `[ ]` Define standard JSON data schemas (`Survivor`, `DronePose`, `RiskScore`, `NetworkNode`).
-  - [ ] `[ ]` Set up mock / dummy detection generator pushing live data over WebSockets.
-  - [ ] `[ ]` Establish ROS 2 node bridge to ingest Gazebo telemetry topics into backend.
+- **Sahid (AI & Centralized Backend Intelligence):**
+  - [x] `[DONE]` Initialize NestJS Centralized Backend + MongoDB Atlas integration (`backend/`).
+  - [x] `[DONE]` Implement modular domain schemas:
+    - **5 Core Collections:** `drones`, `survivors`, `network_topologies`, `building_inspections`, `hazards`
+    - **5 Embedded Schemas:** `Position3D`, `SensorEvidence`, `ExplainableRiskBreakdown`, `AccessibleOpening`, `MeshLink`
+  - [x] `[DONE]` Build real-time WebSocket Gateway (`EventsGateway`) broadcasting telemetry, detections, mesh topology, and alerts.
+  - [x] `[DONE]` Build FastAPI AI microservice (`ai_service/`) with RGB+Thermal fusion and explainable risk calculation.
 
 - **Rashel (Frontend & Digital Twin):**
   - [ ] `[ ]` Initialize high-tech dark mode dashboard interface with glassmorphic cards.
