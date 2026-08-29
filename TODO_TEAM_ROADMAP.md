@@ -14,7 +14,7 @@
 | Phase | Bitupan (Simulation & Swarm) | Sahid (AI / Intelligence) | Rashel (Frontend / Digital Twin) | 🎯 Phase Goal | Overall Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
-| **2. Drone Perception** | Add RGB/thermal camera simulation, drone movement and basic flight control. | Implement person detection + thermal/RGB fusion. Generate survivor coordinates/confidence. | Display live detections and survivor locations on map. | Drones can actually find potential survivors | `[PENDING]` |
+| **2. Multi-Spectral Perception** | Add RGB optical & Thermal IR sensor plugins (310K human vs 285K water). Low-altitude area scanning. | **Multi-Spectral Fusion:** YOLOv8 human posture + Thermal IR heat clustering + Bayesian confidence scoring ($0.0 \rightarrow 1.0$) + World GPS. | Build Multi-Spectral HUD (RGB/Thermal split-view) & live confidence badges. | Multi-spectral survivor verification with 0 false alarms | `[PENDING]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[PENDING]` |
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
@@ -48,32 +48,30 @@
   - [x] `[DONE]` Build real-time WebSocket Gateway (`EventsGateway`) broadcasting telemetry, detections, mesh topology, and alerts.
   - [x] `[DONE]` Build FastAPI AI microservice (`ai_service/`) with RGB+Thermal fusion and explainable risk calculation.
 
-- **Rashel (Frontend & Digital Twin):**
-  - [x] `[DONE]` Initialize high-tech dark mode dashboard interface with glassmorphic cards (`frontend/`).
-  - [x] `[DONE]` Connect WebSocket client to NestJS backend service (`ws://localhost:3000`).
-  - [x] `[DONE]` Implement Dynamic Prioritized Rescue Queue, Swarm Telemetry Grid, Building Opening Inspector, and Live Incident Log Feed.
-
-
 ---
 
 ### 📍 Phase 2: Drone Perception & Multi-Spectral Sensing
-*Goal: Drones search and generate realistic RGB + Thermal survivor detections.*
+*Goal: Multi-Spectral Fusion combining RGB Optical + Thermal LWIR (Infrared) + LiDAR to find and verify survivors without claiming concrete X-ray vision.*
+
+> **🔬 Multi-Spectral Fusion Concept:**
+> Autonomous aerial fusion combining **RGB Optical imagery** (human posture, waving, clothing), **Thermal Long-Wave Infrared (LWIR)** ($36.5^\circ\text{C}-37.5^\circ\text{C}$ body heat signatures contrasting with cold $12^\circ\text{C}$ floodwater/concrete), and **LiDAR depth clearance** into a unified Bayesian confidence score ($0.0 \rightarrow 1.0$) with zero false alarms from hot debris or unheated mannequins.
 
 - **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Add RGB optical camera plugin to drone models in Gazebo.
-  - [ ] `[ ]` Add simulated thermal / IR sensor plugin (temperature gradient map / IR signature).
+  - [ ] `[ ]` Add RGB optical camera plugin to drone models in Gazebo (`/drone_1/camera/image_raw`).
+  - [ ] `[ ]` Add simulated thermal / IR sensor plugin (`gz-sim-thermal-sensor-system` for 310K human heat signatures vs 285K cold floodwater).
   - [ ] `[ ]` Implement stable low-altitude flight paths & hover controllers for area scanning.
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Implement visual human detection on optical frames (YOLO / OpenCV contour / posture model).
-  - [ ] `[ ]` Implement thermal signature extractor (hotspot thresholding & body heat clustering).
-  - [ ] `[ ]` Build RGB + Thermal fusion scoring: compute combined survivor confidence score ($0.0 \rightarrow 1.0$).
-  - [ ] `[ ]` Output calibrated GPS / World coordinates for detected survivors.
+  - [ ] `[ ]` Implement visual human detection on optical frames (YOLOv8 posture model: standing waving, sitting huddled, prone injured).
+  - [ ] `[ ]` Implement thermal signature extractor (infrared temperature thresholding, Otsu body heat clustering).
+  - [ ] `[ ]` **Multi-Spectral Fusion Engine:** Compute spatial IoU overlap and Bayesian evidence combination between RGB human boxes and Thermal heat spots (Generates unified confidence $0.0 \rightarrow 1.0$).
+  - [ ] `[ ]` Output calibrated GPS / World $(X, Y, Z)$ coordinates for detected survivors from camera tilt & drone pose.
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Display live survivor detection markers with real-time confidence % badges.
+  - [ ] `[ ]` Build Multi-Spectral HUD view (RGB Optical stream side-by-side with Thermal IR False-Color colormap).
+  - [ ] `[ ]` Display live survivor detection markers with real-time Multi-Spectral confidence % badges.
   - [ ] `[ ]` Implement survivor density heatmap overlay layer on the disaster map.
-  - [ ] `[ ]` Build Survivor Detail Drawer showing RGB & Thermal inspection thumbnails.
+  - [ ] `[ ]` Build Survivor Detail Drawer showing RGB & Thermal inspection thumbnails with explainable sensor breakdown.
 
 ---
 
