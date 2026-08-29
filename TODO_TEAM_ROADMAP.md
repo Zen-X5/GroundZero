@@ -36,9 +36,9 @@
   - [x] `[DONE]` Model damaged urban structures (Apartments, Commercial Tower, Warehouse, Clinic, Bank) with realistic multi-floor window voids and glass openings.
   - [x] `[DONE]` Generate 3D volumetric photorealistic human models (`human_standing_waving`, `human_sitting_clinging`, `human_prone_injured`) with PBR textures and thermal emissivity.
   - [x] `[DONE]` Populate 35+ realistic disaster survivors across roofs, window voids, road verges, and high tree branches in Sector A, Sector B flanks, and Sector C.
-  - [ ] `[ ]` Spawn 2–3 quadcopter drone models in Gazebo (`simulation/models/rescue_drone/`).
-  - [ ] `[ ]` Configure ROS 2 publishers for drone telemetry (`/drone_1/odometry`, `/drone_2/odometry`, `/drone_3/odometry`).
-  - [ ] `[ ]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`, `/drone_2/camera/image_raw`, `/drone_3/camera/image_raw`).
+  - [x] `[DONE]` Spawn 2–3 quadcopter drone models in Gazebo (`simulation/models/rescue_drone/`).
+  - [x] `[DONE]` Configure ROS 2 publishers for drone telemetry (`/drone_1/odometry`, `/drone_2/odometry`, `/drone_3/odometry`).
+  - [x] `[DONE]` Publish preliminary camera topic stream (`/drone_1/camera/image_raw`, `/drone_2/camera/image_raw`, `/drone_3/camera/image_raw`).
 
 - **Sahid (AI & Centralized Backend Intelligence):**
   - [x] `[DONE]` Initialize NestJS Centralized Backend + MongoDB Atlas integration (`backend/`).

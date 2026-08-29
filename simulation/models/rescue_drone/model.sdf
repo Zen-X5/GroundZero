@@ -6,6 +6,7 @@
 
     <!-- Main Airframe Link -->
     <link name="base_link">
+      <gravity>false</gravity>
       <inertial>
         <mass>1.5</mass>
         <inertia>

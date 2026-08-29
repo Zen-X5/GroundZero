@@ -29,6 +29,10 @@ env/
 venv/
 .venv/
 ENV/
+venv-ardupilot/
+*env/
+*venv/
+build/
 ai_service/.venv/
 ai_service/env/
 develop-eggs/
