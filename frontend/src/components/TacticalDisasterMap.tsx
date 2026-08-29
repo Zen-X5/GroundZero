@@ -78,6 +78,16 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
               <stop offset="100%" stopColor="rgba(0, 40, 120, 0.4)" />
             </linearGradient>
 
+            {/* Heatmap Radial Gradients */}
+            <radialGradient id="heat-red" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(255, 42, 85, 0.45)" />
+              <stop offset="100%" stopColor="rgba(255, 42, 85, 0)" />
+            </radialGradient>
+            <radialGradient id="heat-amber" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(245, 158, 11, 0.45)" />
+              <stop offset="100%" stopColor="rgba(245, 158, 11, 0)" />
+            </radialGradient>
+
             {/* Pulse Glow Filters */}
             <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="4" result="blur" />
@@ -88,6 +98,19 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
+
+          {/* Embedded style for line animations */}
+          <style>{`
+            .manet-link {
+              stroke-dasharray: 8, 4;
+              animation: dash-flow 1.5s linear infinite;
+            }
+            @keyframes dash-flow {
+              to {
+                stroke-dashoffset: -24;
+              }
+            }
+          `}</style>
 
           {/* Background Grid */}
           <rect width="1000" height="500" fill="url(#grid)" />
@@ -123,7 +146,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
 
           {/* ================= MANET MESH LINKS ================= */}
           {drones.length >= 2 && (
-            <g opacity="0.6">
+            <g opacity="0.8">
               {drones.map((d, i) => {
                 if (i === drones.length - 1) return null;
                 const next = drones[i + 1];
@@ -138,9 +161,9 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
                     y1={y1}
                     x2={x2}
                     y2={y2}
+                    className="manet-link"
                     stroke="var(--accent-emerald)"
-                    strokeWidth="1.5"
-                    strokeDasharray="6 4"
+                    strokeWidth="2"
                   />
                 );
               })}
@@ -160,6 +183,9 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
                 onClick={() => onSelectSurvivor(s)}
                 style={{ cursor: 'pointer' }}
               >
+                {/* Prioritized Threat Heatmap Zone overlay */}
+                <circle cx={sx} cy={sy} r="65" fill={`url(#heat-${isCrit ? 'red' : 'amber'})`} />
+
                 {/* Pulse Wave */}
                 <circle cx={sx} cy={sy} r="16" fill="none" stroke={beaconColor} strokeWidth="1.5" opacity="0.6">
                   <animate attributeName="r" from="6" to="24" dur="2s" repeatCount="indefinite" />
@@ -203,10 +229,13 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
                   strokeWidth="2"
                 />
 
-                {/* Callsign Tag */}
-                <rect x={dx - 28} y={dy + 14} width="56" height="14" fill="rgba(0,0,0,0.85)" rx="3" stroke="var(--accent-cyan)" strokeWidth="0.8" />
-                <text x={dx} y={dy + 24} fill="var(--accent-cyan)" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+                {/* Callsign Tag with Altitude and Speed telemetry overlay */}
+                <rect x={dx - 32} y={dy + 14} width="64" height="24" fill="rgba(10,14,22,0.9)" rx="4" stroke="var(--accent-cyan)" strokeWidth="0.8" />
+                <text x={dx} y={dy + 23} fill="var(--accent-cyan)" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
                   {d.callsign}
+                </text>
+                <text x={dx} y={dy + 33} fill="#fff" fontSize="6" fontFamily="monospace" textAnchor="middle">
+                  Z:{(d.position?.z ?? 8.0).toFixed(0)}m | {(d.speed ?? 1.8).toFixed(1)}m/s
                 </text>
               </g>
             );
