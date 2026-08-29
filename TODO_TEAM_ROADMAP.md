@@ -57,9 +57,9 @@
 > Autonomous aerial fusion combining **RGB Optical imagery** (human posture, waving, clothing), **Thermal Long-Wave Infrared (LWIR)** ($36.5^\circ\text{C}-37.5^\circ\text{C}$ body heat signatures contrasting with cold $12^\circ\text{C}$ floodwater/concrete), and **LiDAR depth clearance** into a unified Bayesian confidence score ($0.0 \rightarrow 1.0$) with zero false alarms from hot debris or unheated mannequins.
 
 - **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Add RGB optical camera plugin to drone models in Gazebo (`/drone_1/camera/image_raw`).
-  - [ ] `[ ]` Add simulated thermal / IR sensor plugin (`gz-sim-thermal-sensor-system` for 310K human heat signatures vs 285K cold floodwater).
-  - [ ] `[ ]` Implement stable low-altitude flight paths & hover controllers for area scanning.
+  - [x] `[DONE]` Add RGB optical camera plugin to drone models in Gazebo (`/drone_1/camera/image_raw`).
+  - [x] `[DONE]` Add simulated thermal / IR sensor plugin (`gz-sim-thermal-sensor-system` for 310K human heat signatures vs 285K cold floodwater).
+  - [x] `[DONE]` Implement stable low-altitude flight paths & hover controllers for area scanning.
 
 - **Sahid (AI & Intelligence):**
   - [ ] `[ ]` Implement visual human detection on optical frames (YOLOv8 posture model: standing waving, sitting huddled, prone injured).

@@ -17,4 +17,10 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
+# Install executable python scripts
+install(PROGRAMS
+  scripts/drone_scan_controller.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

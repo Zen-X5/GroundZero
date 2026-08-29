@@ -20,6 +20,7 @@ def configure_drone_sdf(drone_name):
     
     # Replace relative topics with absolute namespaced topics
     content = content.replace('<topic>camera/image_raw</topic>', f'<topic>/{drone_name}/camera/image_raw</topic>')
+    content = content.replace('<topic>thermal_camera/image_raw</topic>', f'<topic>/{drone_name}/thermal_camera/image_raw</topic>')
     content = content.replace('<topic>imu</topic>', f'<topic>/{drone_name}/imu</topic>')
     content = content.replace('<topic>cmd_vel</topic>', f'<topic>/{drone_name}/cmd_vel</topic>')
     content = content.replace('<odom_topic>odometry</odom_topic>', f'<odom_topic>/{drone_name}/odometry</odom_topic>')

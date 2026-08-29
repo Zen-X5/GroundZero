@@ -99,6 +99,27 @@
         </camera>
       </sensor>
 
+      <!-- Downward/Forward Thermal IR Camera Sensor -->
+      <sensor name="thermal_camera" type="thermal">
+        <pose>0.15 0.05 -0.05 0 0.52 0</pose> <!-- Tilted 30 degrees down, offset slightly from RGB -->
+        <always_on>1</always_on>
+        <update_rate>10</update_rate>
+        <visualize>true</visualize>
+        <topic>thermal_camera/image_raw</topic>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov> <!-- 60 deg FOV -->
+          <image>
+            <width>320</width>
+            <height>240</height>
+            <format>L8</format> <!-- Grayscale representation of heat maps -->
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+        </camera>
+      </sensor>
+
       <!-- IMU Sensor -->
       <sensor name="imu" type="imu">
         <always_on>1</always_on>
