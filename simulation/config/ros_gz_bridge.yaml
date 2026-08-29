@@ -25,6 +25,12 @@
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/drone_1/thermal_camera/image_raw"
+  gz_topic_name: "/drone_1/thermal_camera/image_raw"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
 # Drone 2 (Sector B - Debris Corridor / Mesh Relay)
 - ros_topic_name: "/drone_2/cmd_vel"
   gz_topic_name: "/drone_2/cmd_vel"
@@ -50,6 +56,12 @@
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/drone_2/thermal_camera/image_raw"
+  gz_topic_name: "/drone_2/thermal_camera/image_raw"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
 # Drone 3 (Sector C - Collapsed Buildings / Voids)
 - ros_topic_name: "/drone_3/cmd_vel"
   gz_topic_name: "/drone_3/cmd_vel"
@@ -73,4 +85,10 @@
   gz_topic_name: "/drone_3/imu"
   ros_type_name: "sensor_msgs/msg/Imu"
   gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/drone_3/thermal_camera/image_raw"
+  gz_topic_name: "/drone_3/thermal_camera/image_raw"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
