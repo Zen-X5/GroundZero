@@ -86,15 +86,15 @@
   - [ ] `[ ]` Simulate peer-to-peer radio packet exchange between drones.
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Build multi-drone spatial-temporal fusion: merge overlapping detections of the same survivor into a single verified target.
-  - [ ] `[ ]` Boost survivor confidence score when multiple independent drones confirm the sighting.
-  - [ ] `[ ]` Calculate initial survivor priority ranking based on initial sensor data.
+  - [x] `[x]` Build multi-drone spatial-temporal fusion: merge overlapping detections of the same survivor into a single verified target.
+  - [x] `[x]` Boost survivor confidence score when multiple independent drones confirm the sighting.
+  - [x] `[x]` Calculate initial survivor priority ranking based on initial sensor data.
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Render drone coverage search circles / sector polygons in real-time.
-  - [ ] `[ ]` Render all active drones with orientation headings, speed, and altitude.
-  - [ ] `[ ]` Animate inter-drone communication links and pulse lines.
-  - [ ] `[ ]` Display live prioritized survivor heatmap.
+  - [x] `[x]` Render drone coverage search circles / sector polygons in real-time.
+  - [x] `[x]` Render all active drones with orientation headings, speed, and altitude.
+  - [x] `[x]` Animate inter-drone communication links and pulse lines.
+  - [x] `[x]` Display live prioritized survivor heatmap.
 
 ---
 

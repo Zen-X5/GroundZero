@@ -310,7 +310,8 @@ class MultiSpectralPerceptionNode(Node):
                     ]
                 },
                 "status": "RESCUE_QUEUED",
-                "estimatedGroupSize": 1
+                "estimatedGroupSize": 1,
+                "confirmingDrones": [current_d.upper()]
             }
 
             try:
