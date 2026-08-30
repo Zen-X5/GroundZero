@@ -16,7 +16,8 @@
 | **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
 | **2. Multi-Spectral Perception** | 3 multi-sensor drones with RGB optical & thermal camera & autonomous search flight. `[DONE]` | **Multi-Spectral Fusion:** YOLOv8 posture + FLIR heat extraction + Bayesian confidence ($85\%-98\%$) + Ray-projected GPS ground coordinates + NestJS push. `[DONE]` | Dual-Stream Multi-Spectral HUD view (RGB + FLIR split), live badges, and Explainable AI reasoning cards. `[DONE]` | Multi-spectral survivor verification with 0 false alarms | `[DONE]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. `[DONE]` | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[DONE]` |
-| **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. `[DONE]` | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. `[DONE]` | System keeps working without cellular infrastructure | `[PENDING]` |
+
+| **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. `[DONE]` | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
 | **6. Disaster Dynamics** | Introduce changing flood levels, blocked routes, drone failure/battery loss, etc. | Recalculate risk and priorities dynamically as conditions change. | Live alerts: CRITICAL / HIGH / MEDIUM, timeline of events. | System adapts instead of following a fixed script | `[PENDING]` |
 | **7. Final Integration**| Connect Gazebo ROS 2 topics ➔ backend. Stabilize swarm behavior. | Connect perception + fusion + risk engine + communication logic. | Connect every live data stream to Digital Twin. | One complete unified system | `[PENDING]` |
@@ -102,9 +103,9 @@
 *Goal: Complete cellular failure simulation; swarm forms self-healing aerial relay network.*
 
 - **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Simulate total ground cellular tower blackout (zero base station signal).
-  - [ ] `[ ]` Implement radio distance/obstacle attenuation model for drone-to-drone links.
-  - [ ] `[ ]` Program relay drone positioning behavior (drones autonomously hovering as communication bridges).
+  - [x] `[DONE]` Simulate total ground cellular tower blackout (zero base station signal).
+  - [x] `[DONE]` Implement radio distance/obstacle attenuation model for drone-to-drone links.
+  - [x] `[DONE]` Program relay drone positioning behavior (drones autonomously hovering as communication bridges).
 
 - **Sahid (AI & Intelligence):**
   - [x] `[x]` Maintain live swarm network adjacency matrix & routing graph.
