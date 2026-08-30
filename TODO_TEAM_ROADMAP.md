@@ -16,6 +16,7 @@
 | **1. Foundation** | Setup pure Gazebo disaster world (water, buildings, windows, 35+ survivors). `[DONE]` | Setup NestJS backend + MongoDB Atlas schemas + WebSocket Gateway + FastAPI AI Service. `[DONE]` | Build dashboard: prioritized rescue queue, swarm grid, opening inspector, live alerts. `[DONE]` | End-to-End Vertical Pipeline | `[DONE]` |
 | **2. Multi-Spectral Perception** | 3 multi-sensor drones with RGB optical & thermal camera & autonomous search flight. `[DONE]` | **Multi-Spectral Fusion:** YOLOv8 posture + FLIR heat extraction + Bayesian confidence ($85\%-98\%$) + Ray-projected GPS ground coordinates + NestJS push. `[DONE]` | Dual-Stream Multi-Spectral HUD view (RGB + FLIR split), live badges, and Explainable AI reasoning cards. `[DONE]` | Multi-spectral survivor verification with 0 false alarms | `[DONE]` |
 | **3. Swarm Intelligence** | Implement multi-drone sector allocation, formation/coverage and collision avoidance. Drone-to-drone comms. `[DONE]` | Build detection fusion: multiple drones observing same survivor ➔ one unified detection. Priority score. | Show drone coverage circles, communication links, and priority heatmap. | Swarm behaves like one coordinated system | `[DONE]` |
+
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. `[DONE]` | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. | System keeps working without cellular infrastructure | `[PENDING]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
 | **6. Disaster Dynamics** | Introduce changing flood levels, blocked routes, drone failure/battery loss, etc. | Recalculate risk and priorities dynamically as conditions change. | Live alerts: CRITICAL / HIGH / MEDIUM, timeline of events. | System adapts instead of following a fixed script | `[PENDING]` |
@@ -107,16 +108,16 @@
   - [x] `[DONE]` Program relay drone positioning behavior (drones autonomously hovering as communication bridges).
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Maintain live swarm network adjacency matrix & routing graph.
-  - [ ] `[ ]` Track connected vs. disconnected drones; determine best multi-hop relay routes.
-  - [ ] `[ ]` Implement edge caching: store detections on disconnected drones and flush upon reconnect.
+  - [x] `[x]` Maintain live swarm network adjacency matrix & routing graph.
+  - [x] `[x]` Track connected vs. disconnected drones; determine best multi-hop relay routes.
+  - [x] `[x]` Implement edge caching: store detections on disconnected drones and flush upon reconnect.
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Build Live Mesh Network Topology visualizer widget:
+  - [x] `[x]` Build Live Mesh Network Topology visualizer widget:
     - 🟢 **Green:** Connected / High-throughput link
     - 🟡 **Yellow:** Weak / Multi-hop relay link
     - 🔴 **Red:** Disconnected / Out of range
-  - [ ] `[ ]` Visualize emergency Wi-Fi hotspot coverage bubbles available for ground survivors.
+  - [x] `[x]` Visualize emergency Wi-Fi hotspot coverage bubbles available for ground survivors.
 
 ---
 

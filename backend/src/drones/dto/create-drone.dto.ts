@@ -17,6 +17,8 @@ export class CreateDroneDto {
     lidarActive: boolean;
   };
   coveragePercentage?: number;
+  connectedPeers?: string[];
+  isRelayActive?: boolean;
 }
 
 export class UpdateDroneTelemetryDto {
@@ -27,4 +29,6 @@ export class UpdateDroneTelemetryDto {
   status?: 'SCANNING' | 'INSPECTING_OPENING' | 'RELAYING' | 'RETURNING' | 'OFFLINE';
   meshConnected?: boolean;
   coveragePercentage?: number;
+  connectedPeers?: string[];
+  isRelayActive?: boolean;
 }
