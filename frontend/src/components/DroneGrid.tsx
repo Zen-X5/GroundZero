@@ -7,6 +7,15 @@ interface DroneGridProps {
 }
 
 export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
+  const now = Date.now();
+  const HEARTBEAT_TTL_MS = 8000;
+
+  const liveDrones = drones.filter(d => {
+    if (!d?.lastHeartbeatAt) return false;
+    return now - new Date(d.lastHeartbeatAt).getTime() < HEARTBEAT_TTL_MS;
+  });
+
+  const staleCount = drones.length - liveDrones.length;
   const getBatteryColor = (level: number) => {
     if (level <= 25) return 'var(--accent-crimson)';
     if (level <= 50) return 'var(--accent-amber)';
@@ -33,20 +42,32 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
             Swarm Telemetry & Aerial Grid
           </h2>
         </div>
-        <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-          {drones.length} Nodes Active
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+            {liveDrones.length} Active
+          </span>
+          {staleCount > 0 && (
+            <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: '4px', background: 'rgba(255,100,0,0.12)', color: 'rgba(255,140,0,0.8)', border: '1px solid rgba(255,100,0,0.25)' }}>
+              {staleCount} stale hidden
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Drones List */}
       <div style={{ overflowY: 'auto', flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-        {drones.length === 0 ? (
+        {liveDrones.length === 0 ? (
           <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-dim)', gridColumn: '1 / -1' }}>
             <Cpu size={28} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
             <p style={{ fontSize: '0.85rem' }}>No active swarm telemetry received.</p>
+            {staleCount > 0 && (
+              <p style={{ fontSize: '0.75rem', marginTop: '6px', color: 'rgba(255,140,0,0.7)', fontFamily: 'var(--font-mono)' }}>
+                {staleCount} stale record{staleCount > 1 ? 's' : ''} in DB — start the Gazebo simulation to see live drones.
+              </p>
+            )}
           </div>
         ) : (
-          drones.map((drone) => (
+          liveDrones.map((drone) => (
             <div
               key={drone.callsign || drone._id}
               style={{

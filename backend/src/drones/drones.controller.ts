@@ -28,4 +28,10 @@ export class DronesController {
   ) {
     return await this.dronesService.updateStatus(callsign, updateDto);
   }
+
+  @Post('purge-stale')
+  async purgeStale() {
+    return await this.dronesService.purgeStale();
+  }
 }
+
