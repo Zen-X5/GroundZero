@@ -42,6 +42,9 @@ export class BuildingInspection {
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
   estimatedOccupancyProbability: number;
 
+  @Prop({ type: [String], default: [] })
+  surveyedAngles: string[];
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Drone' }], default: [] })
   inspectionDrones: Types.ObjectId[] | Drone[];
 

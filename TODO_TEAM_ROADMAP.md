@@ -19,9 +19,8 @@
 
 | **4. Comms Blackout** | Simulate destroyed cellular towers / disconnected zones. Implement drone-to-drone relay/mesh concept. `[DONE]` | Track network connectivity & determine which drone can relay info. Handle delayed/missing data. `[DONE]` | Show LIVE network topology: 🟢 connected / 🔴 disconnected / 🟡 weak. `[DONE]` | System keeps working without cellular infrastructure | `[DONE]` |
 | **5. Building Search** | Create damaged/collapsed buildings + accessible openings/windows. Drones navigate around structures. | Detect buildings ➔ identify openings ➔ analyze RGB/thermal observations ➔ estimate probability (No X-ray). | 3D building view + survivor probability + inspection status. | Autonomous building inspection | `[PENDING]` |
-| **6. Disaster Dynamics** | Introduce changing flood levels, blocked routes, drone failure/battery loss, etc. | Recalculate risk and priorities dynamically as conditions change. | Live alerts: CRITICAL / HIGH / MEDIUM, timeline of events. | System adapts instead of following a fixed script | `[PENDING]` |
-| **7. Final Integration**| Connect Gazebo ROS 2 topics ➔ backend. Stabilize swarm behavior. | Connect perception + fusion + risk engine + communication logic. | Connect every live data stream to Digital Twin. | One complete unified system | `[PENDING]` |
-| **8. Final Polish** | Make simulation visually clean and reliable. | Prepare AI explanation: *why this survivor is priority #1*. | Make dashboard presentation-ready + replay/demo controls. | Competition-ready demo | `[PENDING]` |
+| **6. Final Integration**| Connect Gazebo ROS 2 topics ➔ backend. Stabilize swarm behavior. | Connect perception + fusion + risk engine + communication logic. | Connect every live data stream to Digital Twin. | One complete unified system | `[PENDING]` |
+| **7. Final Polish** | Make simulation visually clean and reliable. | Prepare AI explanation: *why this survivor is priority #1*. | Make dashboard presentation-ready + replay/demo controls. | Competition-ready demo | `[PENDING]` |
 
 ---
 
@@ -129,9 +128,9 @@
   - [ ] `[ ]` Program orbital inspection flight maneuvers allowing drones to circle buildings at multiple altitudes and angles.
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Implement damaged building detection & perimeter opening identification.
-  - [ ] `[ ]` Analyze RGB + Thermal feeds across multiple viewing angles.
-  - [ ] `[ ]` Compute probabilistic survivor likelihood based on venting heat, motion near openings, and structural damage (strictly adhering to scientific rules).
+  - [x] `[DONE]` Implement damaged building detection & perimeter opening identification.
+  - [x] `[DONE]` Analyze RGB + Thermal feeds across multiple viewing angles.
+  - [x] `[DONE]` Compute probabilistic survivor likelihood based on venting heat, motion near openings, and structural damage (strictly adhering to scientific rules).
 
 - **Rashel (Frontend & Digital Twin):**
   - [ ] `[ ]` Build 3D / Isometric Building Inspection UI card.
@@ -139,27 +138,7 @@
 
 ---
 
-### 📍 Phase 6: Disaster Dynamics & Dynamic Re-Ranking
-*Goal: Swarm and AI dynamically adapt to rising flood waters, road blockages, and drone losses.*
-
-- **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Trigger dynamic flood rise: water plane elevation increases dynamically during simulation.
-  - [ ] `[ ]` Trigger dynamic road blockage / secondary structural collapse events.
-  - [ ] `[ ]` Trigger drone battery depletion or communication node failure mid-operation.
-
-- **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Dynamically recalculate survivor risk scores based on proximity to rising flood levels.
-  - [ ] `[ ]` Automatically reorder the Rescue Priority Queue as threats escalate.
-  - [ ] `[ ]` Reconfigure swarm task allocation when a drone goes offline or disconnects.
-
-- **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Build Real-Time Emergency Alert Ticker (`CRITICAL`, `HIGH`, `MEDIUM`).
-  - [ ] `[ ]` Live animated update of the Prioritized Rescue Queue with rising threat tags.
-  - [ ] `[ ]` Render dynamic flood layer expansion on the disaster map.
-
----
-
-### 📍 Phase 7: Full Pipeline Integration
+### 📍 Phase 6: Full Pipeline Integration
 *Goal: Gazebo ➔ ROS 2 ➔ AI Perception/Fusion ➔ Backend ➔ Digital Twin working seamlessly in real time.*
 
 - **Bitupan (Simulation & Swarm):**
@@ -176,7 +155,7 @@
 
 ---
 
-### 📍 Phase 8: Final Polish & Competition Demo Mode
+### 📍 Phase 7: Final Polish & Competition Demo Mode
 *Goal: Competition-ready demonstration with explainable AI reasoning and interactive controls.*
 
 - **Bitupan (Simulation & Swarm):**
