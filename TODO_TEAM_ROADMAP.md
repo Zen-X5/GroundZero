@@ -142,16 +142,16 @@
 *Goal: Gazebo ➔ ROS 2 ➔ AI Perception/Fusion ➔ Backend ➔ Digital Twin working seamlessly in real time.*
 
 - **Bitupan (Simulation & Swarm):**
-  - [ ] `[ ]` Bridge all Gazebo simulation streams directly into standard ROS 2 topics.
-  - [ ] `[ ]` Stabilize multi-drone physics and search loops for long-duration demo runs.
+  - [x] `[DONE]` Bridge all Gazebo simulation streams directly into standard ROS 2 topics.
+  - [x] `[DONE]` Stabilize multi-drone physics and search loops for long-duration demo runs.
 
 - **Sahid (AI & Intelligence):**
-  - [ ] `[ ]` Connect perception, multi-drone fusion, risk prioritization, and network graph engines.
-  - [ ] `[ ]` Stream unified operational state via WebSocket at $\ge 10\text{ Hz}$.
+  - [x] `[DONE]` Connect perception, multi-drone fusion, risk prioritization, and network graph engines.
+  - [x] `[DONE]` Stream unified operational state via WebSocket at $\ge 10\text{ Hz}$.
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Bind all UI panels, maps, network graphs, and queues to the live WebSocket stream.
-  - [ ] `[ ]` Ensure smooth 60 FPS performance without frame drops.
+  - [x] `[DONE]` Bind all UI panels, maps, network graphs, and queues to the live WebSocket stream.
+  - [x] `[DONE]` Ensure smooth 60 FPS performance without frame drops.
 
 ---
 
