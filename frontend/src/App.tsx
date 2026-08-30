@@ -7,6 +7,7 @@ import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
 import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
+import { TDoASimulation3D } from './components/TDoASimulation3D';
 import { getSocket } from '../lib/services/socket';
 import {
   useGetDronesQuery,
@@ -30,7 +31,7 @@ import {
 export function App() {
   const [connected, setConnected] = useState(false);
   const [selectedSurvivor, setSelectedSurvivor] = useState<Survivor | null>(null);
-  const [activeTab, setActiveTab] = useState<'MAP' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS'>('MAP');
+  const [activeTab, setActiveTab] = useState<'MAP' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS' | 'TDOA'>('MAP');
   const [activeDrone, setActiveDrone] = useState<string>('drone_2');
 
   // RTK Query Hooks with Automated Tag Caching & WebSocket Streaming
@@ -171,6 +172,15 @@ export function App() {
             <Bell size={18} className="nav-icon" />
             <span>Disaster Feed ({alerts.length})</span>
           </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'TDOA' ? 'active' : ''}`}
+            onClick={() => setActiveTab('TDOA')}
+          >
+            <Radio size={18} className="nav-icon" />
+            <span>TDoA Simulation</span>
+          </div>
+
         </nav>
 
         <div className="saas-sidebar-footer">
@@ -244,6 +254,13 @@ export function App() {
               <AlertFeed alerts={alerts} />
             </div>
           )}
+
+          {activeTab === 'TDOA' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)' }}>
+              <TDoASimulation3D />
+            </div>
+          )}
+
         </div>
       </main>
 
