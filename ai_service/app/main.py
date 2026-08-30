@@ -160,3 +160,69 @@ def seed_phase1_demo():
             results.append({"survivorCode": s["survivorCode"], "error": str(e)})
 
     return {"message": "Phase 1 survivor seed dispatched to NestJS backend", "results": results}
+
+
+# --- TDoA Geolocation Simulation Endpoints ---
+
+class DroneInput(BaseModel):
+    id: str
+    lat: float
+    lon: float
+
+class TdoaSimulationRequest(BaseModel):
+    drones: List[DroneInput]
+    trueSurvivorPos: List[float]  # [lat, lon]
+    noiseStdNs: Optional[float] = 10.0
+    seed: Optional[int] = 42
+
+@app.post("/api/ai/tdoa-simulate")
+def api_tdoa_simulate(req: TdoaSimulationRequest):
+    from app.reasoning.tdoa_locator import (
+        simulate_arrival_times,
+        solve_tdoa,
+        generate_hyperbola,
+        build_beacon,
+        haversine_distance
+    )
+    import numpy as np
+
+    drones_list = [{"id": d.id, "lat": d.lat, "lon": d.lon} for d in req.drones]
+    true_pos = (req.trueSurvivorPos[0], req.trueSurvivorPos[1])
+
+    # 1. Simulate arrival times
+    arrival_times = simulate_arrival_times(
+        drones_list, true_pos, noise_std_ns=req.noiseStdNs, seed=req.seed
+    )
+
+    # 2. Solve TDoA
+    est_pos, residual_cost = solve_tdoa(drones_list, arrival_times)
+    error_m = haversine_distance(*true_pos, *est_pos)
+
+    # 3. Build beacon
+    beacon = build_beacon(est_pos, error_m)
+
+    # 4. Generate hyperbolas
+    area_center = (
+        np.mean([d["lat"] for d in drones_list]),
+        np.mean([d["lon"] for d in drones_list]),
+    )
+    hyperbolas = {}
+    n = len(drones_list)
+    for i in range(n):
+        for j in range(i + 1, n):
+            dt_ij = arrival_times[i] - arrival_times[j]
+            key = f"{drones_list[i]['id']}-{drones_list[j]['id']}"
+            pts = generate_hyperbola(drones_list[i], drones_list[j], dt_ij, area_center)
+            hyperbolas[key] = pts
+
+    return {
+        "drones": drones_list,
+        "arrivalTimes": arrival_times,
+        "estimatedPosition": [est_pos[0], est_pos[1]],
+        "truePosition": [true_pos[0], true_pos[1]],
+        "errorMeters": error_m,
+        "beacon": beacon,
+        "hyperbolas": hyperbolas,
+        "residualCost": residual_cost
+    }
+
