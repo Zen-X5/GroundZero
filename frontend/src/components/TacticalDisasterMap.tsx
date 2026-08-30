@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Compass, ZoomIn, ZoomOut, RotateCcw, Activity, Radio } from 'lucide-react';
-import { Drone, Survivor, NetworkTopology } from '../../lib/types';
+import { Drone, Survivor, NetworkTopology, BuildingInspection } from '../../lib/types';
+import { TacticalDisasterMap3D } from './TacticalDisasterMap3D';
 
 interface TacticalDisasterMapProps {
   drones: Drone[];
   survivors: Survivor[];
   topology: NetworkTopology | null;
+  buildings: BuildingInspection[];
   onSelectSurvivor: (survivor: Survivor) => void;
 }
 
@@ -78,6 +80,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
   drones,
   survivors,
   topology,
+  buildings,
   onSelectSurvivor,
 }) => {
   const [zoom,       setZoom      ] = useState(1);
@@ -85,6 +88,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart,  setDragStart ] = useState({ x: 0, y: 0 });
   const [scanProgress, setScanProgress] = useState(0);
+  const [viewMode,     setViewMode    ] = useState<'2D' | '3D'>('2D');
   const [dronePos, setDronePos] = useState<DronePosState[]>(
     PATROL_CONFIGS.map(c => ({ x: c.waypoints[0].x, y: c.waypoints[0].y, heading: 0 }))
   );
@@ -235,7 +239,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '12px', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>
             {PATROL_CONFIGS.map(d => (
               <span key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -243,6 +247,41 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
                 {d.callsign}
               </span>
             ))}
+          </div>
+          {/* View Mode Toggle */}
+          <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: '6px', overflow: 'hidden', background: 'rgba(4,6,12,0.9)' }}>
+            <button
+              onClick={() => setViewMode('2D')}
+              style={{
+                background: viewMode === '2D' ? 'var(--accent-cyan)' : 'transparent',
+                color: viewMode === '2D' ? '#000' : 'var(--text-muted)',
+                border: 'none',
+                padding: '6px 12px',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              2D
+            </button>
+            <button
+              onClick={() => setViewMode('3D')}
+              style={{
+                background: viewMode === '3D' ? 'var(--accent-cyan)' : 'transparent',
+                color: viewMode === '3D' ? '#000' : 'var(--text-muted)',
+                border: 'none',
+                padding: '6px 12px',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              3D
+            </button>
           </div>
           {/* Live / Sim status pill */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 14px', borderRadius: '6px', border: '1px solid', borderColor: hasLiveDrones ? 'var(--accent-emerald)' : 'rgba(0,240,255,0.28)', background: hasLiveDrones ? 'rgba(16,185,129,0.08)' : 'rgba(0,240,255,0.05)' }}>
@@ -256,36 +295,41 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
 
       {/* Map Container */}
       <div
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
+        onMouseDown={viewMode === '2D' ? handleMouseDown : undefined}
+        onMouseMove={viewMode === '2D' ? handleMouseMove : undefined}
+        onMouseUp={viewMode === '2D' ? handleMouseUp : undefined}
+        onMouseLeave={viewMode === '2D' ? handleMouseUp : undefined}
+        onWheel={viewMode === '2D' ? handleWheel : undefined}
         style={{
           position: 'relative', flex: 1, minHeight: '520px',
           background: '#020407', borderRadius: '12px', overflow: 'hidden',
           border: '1px solid var(--border-subtle)',
-          cursor: isDragging ? 'grabbing' : 'grab',
+          cursor: viewMode === '2D' ? (isDragging ? 'grabbing' : 'grab') : 'default',
         }}
       >
         {/* Zoom controls */}
-        <div style={{ position: 'absolute', top: 14, right: 14, zIndex: 20, display: 'flex', gap: '5px', background: 'rgba(4,6,12,0.92)', padding: '5px', borderRadius: '6px', border: '1px solid var(--border-subtle)', backdropFilter: 'blur(10px)' }}>
-          <button className="btn-cyber" style={{ padding: '5px' }} title="Zoom In"
-            onClick={e => { e.stopPropagation(); setZoom(z => Math.min(4, z * 1.25)); }}>
-            <ZoomIn size={13} />
-          </button>
-          <button className="btn-cyber" style={{ padding: '5px' }} title="Zoom Out"
-            onClick={e => { e.stopPropagation(); setZoom(z => Math.max(0.5, z / 1.25)); }}>
-            <ZoomOut size={13} />
-          </button>
-          <button className="btn-cyber" style={{ padding: '5px' }} title="Reset"
-            onClick={e => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }}>
-            <RotateCcw size={13} />
-          </button>
-          <span style={{ display: 'flex', alignItems: 'center', padding: '0 7px', fontSize: '0.68rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>
-            {(zoom * 100).toFixed(0)}%
-          </span>
-        </div>
+        {viewMode === '2D' && (
+          <div style={{ position: 'absolute', top: 14, right: 14, zIndex: 20, display: 'flex', gap: '5px', background: 'rgba(4,6,12,0.92)', padding: '5px', borderRadius: '6px', border: '1px solid var(--border-subtle)', backdropFilter: 'blur(10px)' }}>
+            <button className="btn-cyber" style={{ padding: '5px' }} title="Zoom In"
+              onClick={e => { e.stopPropagation(); setZoom(z => Math.min(4, z * 1.25)); }}>
+              <ZoomIn size={13} />
+            </button>
+            <button className="btn-cyber" style={{ padding: '5px' }} title="Zoom Out"
+              onClick={e => { e.stopPropagation(); setZoom(z => Math.max(0.5, z / 1.25)); }}>
+              <ZoomOut size={13} />
+            </button>
+            <button className="btn-cyber" style={{ padding: '5px' }} title="Reset"
+              onClick={e => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }}>
+              <RotateCcw size={13} />
+            </button>
+            <span style={{ display: 'flex', alignItems: 'center', padding: '0 7px', fontSize: '0.68rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>
+              {(zoom * 100).toFixed(0)}%
+            </span>
+          </div>
+        )}
+
+        {viewMode === '2D' ? (
+          <>
 
 
 
@@ -536,6 +580,17 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
             transformOrigin: 'center',
           }}
         />
+      </>
+    ) : (
+      <TacticalDisasterMap3D
+        drones={drones}
+        simDrones={dronePos}
+        survivors={survivors}
+        topology={topology}
+        buildings={buildings}
+        onSelectSurvivor={onSelectSurvivor}
+      />
+    )}
       </div>
     </div>
   );
