@@ -41,33 +41,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect, 
   }
 
   onModuleInit() {
-    this.logger.log('Starting 10 Hz ground-zero unified state broadcaster...');
-    this.broadcastInterval = setInterval(async () => {
-      try {
-        if (!this.server) return;
-        const drones = await this.dronesService.findAll();
-        const topology = await this.networkService.getLatestTopology();
-        const survivors = await this.survivorsService.findAll();
-        const buildings = await this.buildingsService.findAll();
-
-        this.server.emit('state:initial', {
-          drones,
-          survivors,
-          topology,
-          buildings,
-          timestamp: Date.now(),
-        });
-      } catch (err) {
-        this.logger.warn(`Unified state broadcast warning: ${err.message}`);
-      }
-    }, 100);
+    this.logger.log('WebSocket Gateway initialized. Ready for push events.');
   }
 
   onModuleDestroy() {
-    if (this.broadcastInterval) {
-      clearInterval(this.broadcastInterval);
-      this.broadcastInterval = null;
-    }
+    // Cleanup if necessary
   }
 
   handleConnection(client: Socket) {
