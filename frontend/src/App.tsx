@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Header } from './components/Header';
 import { SurvivorQueue } from './components/SurvivorQueue';
 import { DroneGrid } from './components/DroneGrid';
 import { BuildingCards } from './components/BuildingCards';
@@ -16,12 +15,22 @@ import {
   useGetBuildingsQuery,
 } from '../lib/store/apiSlice';
 import { Survivor, SystemAlert } from '../lib/types';
-import { Map, Camera, Radio } from 'lucide-react';
+import { 
+  Map, 
+  Camera, 
+  Radio, 
+  Building2, 
+  Users, 
+  Wifi, 
+  Bell, 
+  Activity, 
+  ShieldCheck 
+} from 'lucide-react';
 
 export function App() {
   const [connected, setConnected] = useState(false);
   const [selectedSurvivor, setSelectedSurvivor] = useState<Survivor | null>(null);
-  const [centerTab, setCenterTab] = useState<'MAP' | 'HUD' | 'SWARM'>('MAP');
+  const [activeTab, setActiveTab] = useState<'MAP' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS'>('MAP');
   const [activeDrone, setActiveDrone] = useState<string>('drone_2');
 
   // RTK Query Hooks with Automated Tag Caching & WebSocket Streaming
@@ -95,121 +104,171 @@ export function App() {
   const criticalCount = survivors.filter((s) => s.riskScore >= 80).length;
 
   return (
-    <div style={{ maxWidth: '1720px', margin: '0 auto', padding: '16px 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-      {/* Top Command Bar */}
-      <Header
-        connected={connected}
-        survivorsCount={survivors.length}
-        criticalCount={criticalCount}
-        dronesCount={drones.length}
-      />
-
-      {/* Main Grid Command Center */}
-      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr 340px', gap: '16px', flex: 1 }}>
-
-        {/* Left Column: Prioritized Rescue Queue */}
-        <div style={{ height: 'calc(100vh - 120px)' }}>
-          <SurvivorQueue
-            survivors={survivors}
-            onSelectSurvivor={(s) => setSelectedSurvivor(s)}
-          />
+    <div className="saas-container">
+      {/* Left Navigation Sidebar */}
+      <aside className="saas-sidebar">
+        <div className="saas-logo-area">
+          <div className="saas-logo-icon">
+            <Activity size={20} color="#fff" />
+          </div>
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 800, color: '#fff', letterSpacing: '0.04em' }}>
+              GROUND-ZERO
+            </h1>
+            <span style={{ fontSize: '0.62rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              AI SWARM RESCUE
+            </span>
+          </div>
         </div>
 
-        {/* Center Column: Interactive Tactical Map / Multi-Spectral HUD / Building Openings */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: 'calc(100vh - 120px)' }}>
-
-          {/* Center Pane Tab Controls */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              className="btn-cyber"
-              onClick={() => setCenterTab('MAP')}
-              style={{
-                background: centerTab === 'MAP' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
-                borderColor: centerTab === 'MAP' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
-                color: centerTab === 'MAP' ? '#fff' : 'var(--text-muted)',
-                fontSize: '0.78rem',
-                padding: '6px 14px',
-              }}
-            >
-              <Map size={14} /> Tactical Map (2D Grid)
-            </button>
-
-            <button
-              className="btn-cyber"
-              onClick={() => setCenterTab('HUD')}
-              style={{
-                background: centerTab === 'HUD' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
-                borderColor: centerTab === 'HUD' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
-                color: centerTab === 'HUD' ? '#fff' : 'var(--text-muted)',
-                fontSize: '0.78rem',
-                padding: '6px 14px',
-              }}
-            >
-              <Camera size={14} /> Multi-Spectral Live HUD
-            </button>
-
-            <button
-              className="btn-cyber"
-              onClick={() => setCenterTab('SWARM')}
-              style={{
-                background: centerTab === 'SWARM' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(0,0,0,0.3)',
-                borderColor: centerTab === 'SWARM' ? 'var(--accent-cyan)' : 'var(--border-subtle)',
-                color: centerTab === 'SWARM' ? '#fff' : 'var(--text-muted)',
-                fontSize: '0.78rem',
-                padding: '6px 14px',
-              }}
-            >
-              <Radio size={14} /> Swarm Telemetry Nodes
-            </button>
+        <nav className="saas-nav-list">
+          <div 
+            className={`saas-nav-item ${activeTab === 'MAP' ? 'active' : ''}`}
+            onClick={() => setActiveTab('MAP')}
+          >
+            <Map size={18} className="nav-icon" />
+            <span>Tactical Map</span>
           </div>
 
-          {/* Dynamic Center Pane Content */}
-          <div style={{ flex: '1 1 55%', minHeight: '340px' }}>
-            {centerTab === 'MAP' && (
+          <div 
+            className={`saas-nav-item ${activeTab === 'HUD' ? 'active' : ''}`}
+            onClick={() => setActiveTab('HUD')}
+          >
+            <Camera size={18} className="nav-icon" />
+            <span>Multi-Spectral HUD</span>
+          </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'FLEET' ? 'active' : ''}`}
+            onClick={() => setActiveTab('FLEET')}
+          >
+            <Radio size={18} className="nav-icon" />
+            <span>Drone Fleet ({drones.length})</span>
+          </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'BUILDINGS' ? 'active' : ''}`}
+            onClick={() => setActiveTab('BUILDINGS')}
+          >
+            <Building2 size={18} className="nav-icon" />
+            <span>Building Voids ({buildings.length})</span>
+          </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'QUEUE' ? 'active' : ''}`}
+            onClick={() => setActiveTab('QUEUE')}
+          >
+            <Users size={18} className="nav-icon" />
+            <span>Rescue Queue ({survivors.length})</span>
+          </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'MANET' ? 'active' : ''}`}
+            onClick={() => setActiveTab('MANET')}
+          >
+            <Wifi size={18} className="nav-icon" />
+            <span>MANET Topology</span>
+          </div>
+
+          <div 
+            className={`saas-nav-item ${activeTab === 'ALERTS' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ALERTS')}
+          >
+            <Bell size={18} className="nav-icon" />
+            <span>Disaster Feed ({alerts.length})</span>
+          </div>
+        </nav>
+
+        <div className="saas-sidebar-footer">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div className={`live-dot ${connected ? 'green' : 'red'}`} />
+            <span style={{ color: connected ? 'var(--text-main)' : 'var(--accent-crimson)', fontWeight: 700 }}>
+              {connected ? 'LINK ONLINE' : 'DISCONNECTED'}
+            </span>
+          </div>
+          <span style={{ fontSize: '0.62rem' }}>Prakriti Avinya 2026</span>
+        </div>
+      </aside>
+
+      {/* Right Main Panel Workspace */}
+      <main className="saas-main-content">
+        <div className="saas-workspace">
+          {activeTab === 'MAP' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)' }}>
               <TacticalDisasterMap
                 drones={drones}
                 survivors={survivors}
                 topology={topology}
                 onSelectSurvivor={(s) => setSelectedSurvivor(s)}
               />
-            )}
-            {centerTab === 'HUD' && (
+            </div>
+          )}
+
+          {activeTab === 'HUD' && (
+            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
               <MultiSpectralHUD
                 activeDrone={activeDrone}
                 onSelectDrone={(d) => setActiveDrone(d)}
               />
-            )}
-            {centerTab === 'SWARM' && (
+            </div>
+          )}
+
+          {activeTab === 'FLEET' && (
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '0.02em' }}>
+                  Swarm Telemetry Fleet Nodes
+                </h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Real-time health, altitude coordinates, and navigation speeds of active search quadcopters.
+                </p>
+              </div>
               <DroneGrid drones={drones} />
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Lower Center: Building Void Inspections */}
-          <div style={{ flex: '1 1 45%', minHeight: '260px' }}>
-            <BuildingCards buildings={buildings} />
-          </div>
+          {activeTab === 'BUILDINGS' && (
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '0.02em' }}>
+                  Collapsed Structure Openings & Balcony Voids
+                </h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Accessibility surveys and thermal venting scores per structure (concrete void perimeter inspections).
+                </p>
+              </div>
+              <BuildingCards buildings={buildings} />
+            </div>
+          )}
 
+          {activeTab === 'QUEUE' && (
+            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
+              <SurvivorQueue
+                survivors={survivors}
+                onSelectSurvivor={(s) => setSelectedSurvivor(s)}
+              />
+            </div>
+          )}
+
+          {activeTab === 'MANET' && (
+            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
+              <NetworkStatus topology={topology} />
+            </div>
+          )}
+
+          {activeTab === 'ALERTS' && (
+            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
+              <AlertFeed alerts={alerts} />
+            </div>
+          )}
         </div>
-
-        {/* Right Column: MANET Mesh Network & Live Alerts */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: 'calc(100vh - 120px)' }}>
-          <div style={{ flex: '1 1 45%' }}>
-            <NetworkStatus topology={topology} />
-          </div>
-          <div style={{ flex: '1 1 55%' }}>
-            <AlertFeed alerts={alerts} />
-          </div>
-        </div>
-
-      </div>
+      </main>
 
       {/* Explainable AI Detail Modal */}
       <SurvivorDetailModal
         survivor={selectedSurvivor}
         onClose={() => setSelectedSurvivor(null)}
       />
-
     </div>
   );
 }
