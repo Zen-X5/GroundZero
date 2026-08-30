@@ -178,42 +178,9 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
     PATROL_CONFIGS.map(c => ({ x: c.waypoints[0].x, y: c.waypoints[0].y, wpIdx: 0, progress: 0, heading: 0 }))
   );
 
-  // Init fog canvas
-  useEffect(() => {
-    const fog = fogCanvasRef.current;
-    if (!fog) return;
-    fog.width = SVG_W; fog.height = SVG_H;
-    const os = document.createElement('canvas');
-    os.width = SVG_W; os.height = SVG_H;
-    os.getContext('2d')!.fillStyle = 'rgba(3,5,10,1)';
-    os.getContext('2d')!.fillRect(0, 0, SVG_W, SVG_H);
-    offscreenRef.current = os;
-    fog.getContext('2d')!.drawImage(os, 0, 0);
-  }, []);
-
-  const revealAt = useCallback((cx: number, cy: number) => {
-    const os = offscreenRef.current;
-    if (!os) return;
-    const ctx = os.getContext('2d')!;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, SCAN_RADIUS);
-    g.addColorStop(0,    'rgba(0,0,0,1)');
-    g.addColorStop(0.55, 'rgba(0,0,0,0.97)');
-    g.addColorStop(0.80, 'rgba(0,0,0,0.55)');
-    g.addColorStop(0.92, 'rgba(0,0,0,0.10)');
-    g.addColorStop(1,    'rgba(0,0,0,0)');
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx, cy, SCAN_RADIUS, 0, Math.PI * 2); ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-  }, []);
-
-  const drawFog = useCallback(() => {
-    const fc = fogCanvasRef.current, os = offscreenRef.current;
-    if (!fc || !os) return;
-    const ctx = fc.getContext('2d')!;
-    ctx.clearRect(0, 0, SVG_W, SVG_H);
-    ctx.drawImage(os, 0, 0);
-  }, []);
+  // Fog Canvas disabled
+  const revealAt = useCallback((cx: number, cy: number) => {}, []);
+  const drawFog = useCallback(() => {}, []);
 
   const hasLiveDrones = drones.filter(d => {
     if (!d?.lastHeartbeatAt) return false;
@@ -561,7 +528,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
               <g key={cfg.id}>
                 <circle cx={pos.x} cy={pos.y} r={SCAN_RADIUS} fill={cfg.color + '06'} stroke={cfg.color + '18'} strokeWidth="0.8" strokeDasharray="3 4" />
                 <g transform={`translate(${pos.x},${pos.y}) rotate(${pos.heading})`}>
-                  <path d="M 0 0 L 70 -28 A 76 76 0 0 1 70 28 Z" fill={cfg.color + '0c'} stroke={cfg.color + '22'} strokeWidth="0.8" />
+                  <path d="M 0 0 L 70 -28 A 76 76 0 0 1 70 28 Z" fill="rgba(239, 68, 68, 0.15)" stroke="rgba(239, 68, 68, 0.4)" strokeWidth="1" />
                 </g>
                 <circle cx={pos.x} cy={pos.y} r="10" fill="#040810" stroke={cfg.color} strokeWidth="2" filter="url(#glow-c)" />
                 <circle cx={pos.x} cy={pos.y} r="4" fill={cfg.color} />
@@ -581,6 +548,9 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
             return (
               <g key={d.callsign}>
                 <circle cx={dx} cy={dy} r={SCAN_RADIUS} fill={col + '06'} stroke={col + '20'} strokeWidth="0.8" strokeDasharray="3 4" />
+                <g transform={`translate(${dx},${dy}) rotate(${(d.heading ?? 0) - 90})`}>
+                  <path d="M 0 0 L 70 -28 A 76 76 0 0 1 70 28 Z" fill="rgba(239, 68, 68, 0.15)" stroke="rgba(239, 68, 68, 0.4)" strokeWidth="1" />
+                </g>
                 <circle cx={dx} cy={dy} r="10" fill="#040810" stroke={col} strokeWidth="2" filter="url(#glow-c)" />
                 <circle cx={dx} cy={dy} r="4" fill={col} />
                 <line x1={dx} y1={dy} x2={dx + 18 * Math.cos(hr)} y2={dy + 18 * Math.sin(hr)} stroke="#fff" strokeWidth="2" />
@@ -591,8 +561,7 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
           })}
         </svg>
 
-        {/* Fog of War Canvas (2D only) */}
-        <canvas ref={fogCanvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', transform: svgT, transformOrigin: 'center', display: viewMode === '2D' ? 'block' : 'none' }} />
+        {/* Fog of War Canvas disabled */}
 
         {/* Three.js 3D Scene (3D only) */}
         {viewMode === '3D' && (
