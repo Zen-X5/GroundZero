@@ -11,3 +11,7 @@ langchain>=0.2.0
 langgraph>=0.0.60
 langchain-groq==0.3.6
 motor>=3.4.0
+langchain>=0.2.0
+langgraph>=0.0.60
+langchain-groq==0.3.6
+motor>=3.4.0
