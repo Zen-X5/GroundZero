@@ -9,6 +9,7 @@ import logging
 from app.core.config import settings
 from app.perception.fusion import fuse_sensor_modalities, calculate_multi_drone_boost
 from app.reasoning.risk_engine import calculate_explainable_risk
+from app.services.satellite_mapper import get_flood_mask_geojson
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -193,7 +194,6 @@ def seed_phase1_demo():
 
     return {"message": "Phase 1 survivor seed dispatched to NestJS backend", "results": results}
 
-
 # --- TDoA Geolocation Simulation Endpoints ---
 
 class DroneInput(BaseModel):
@@ -258,3 +258,9 @@ def api_tdoa_simulate(req: TdoaSimulationRequest):
         "residualCost": residual_cost
     }
 
+@app.get("/api/v1/satellite/live-flood-map")
+def live_flood_map():
+    # Fetch GeoJSON flood mask for a generic test region using Earth Engine
+    # Note: In a real disaster, we would pass dynamic bbox coordinates
+    geojson_data = get_flood_mask_geojson()
+    return geojson_data
