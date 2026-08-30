@@ -27,6 +27,14 @@ class DroneScanController(Node):
         self.base_pos = [0.0, 50.0, 0.0]
         self.communication_range = 65.0  # meters
         
+        # Axis-Aligned Bounding Boxes (AABB) of large concrete buildings to simulate obstacle blocking
+        self.obstacles = [
+            # Building 1: Apartments [x_min, x_max, y_min, y_max, height]
+            [147.0, 163.0, 25.0, 39.0, 10.0],
+            # Building 2: Commercial Tower [x_min, x_max, y_min, y_max, height]
+            [141.0, 155.0, 68.0, 82.0, 14.0]
+        ]
+        
         # Detection database of survivor coordinates from world SDF
         self.survivors = {
             'survivor_01_tree1': [18.8, 32.5, 4.5],
@@ -88,8 +96,8 @@ class DroneScanController(Node):
                 'pos': [0.0, 0.0, 0.0],
                 'yaw': 0.0,
                 'waypoints': self.generate_orbit_waypoints([
-                    {'center': [155.0, 28.5], 'radius': 12.0, 'altitude': 8.0}, # Building 1 Orbit
-                    {'center': [148.0, 74.0], 'radius': 12.0, 'altitude': 8.0}  # Building 2 Orbit
+                    {'center': [155.0, 28.5], 'radius': 12.0, 'altitude': 16.0}, # Building 1 Orbit
+                    {'center': [148.0, 74.0], 'radius': 12.0, 'altitude': 16.0}  # Building 2 Orbit
                 ]),
                 'current_wp_idx': 0,
                 'pub': self.create_publisher(Twist, '/drone_3/cmd_vel', 10),
@@ -112,6 +120,20 @@ class DroneScanController(Node):
         # Timer loop at 10 Hz (every 0.1s)
         self.timer = self.create_timer(0.1, self.control_loop)
         self.get_logger().info('Drone Autonomous Scan Controller, Mesh Simulator & Multi-Spectral HUD Initialized!')
+
+    def is_line_of_sight_blocked(self, p1, p2):
+        # Sample 10 points along the line segment between nodes to check for building collision
+        steps = 10
+        for i in range(1, steps):
+            t = float(i) / steps
+            x = p1[0] + t * (p2[0] - p1[0])
+            y = p1[1] + t * (p2[1] - p1[1])
+            z = p1[2] + t * (p2[2] - p1[2])
+            
+            for obs in self.obstacles:
+                if obs[0] <= x <= obs[1] and obs[2] <= y <= obs[3] and z <= obs[4]:
+                    return True
+        return False
 
     def setup_drone_subscribers(self, name):
         self.get_logger().info(f'Subscribing to topics for {name}...')
@@ -298,10 +320,14 @@ class DroneScanController(Node):
                 dist = math.sqrt(dx*dx + dy*dy + dz*dz)
                 
                 if dist <= self.communication_range:
-                    lqi = 100.0 * (1.0 - dist / self.communication_range)
-                    links.append({"from": n1, "to": n2, "lqi": round(lqi, 1), "status": "CONNECTED"})
-                    adj[n1].append((n2, lqi))
-                    adj[n2].append((n1, lqi))
+                    # Apply obstacle attenuation/blockage model
+                    if self.is_line_of_sight_blocked(pos1, pos2):
+                        links.append({"from": n1, "to": n2, "lqi": 0.0, "status": "BLOCKED"})
+                    else:
+                        lqi = 100.0 * (1.0 - dist / self.communication_range)
+                        links.append({"from": n1, "to": n2, "lqi": round(lqi, 1), "status": "CONNECTED"})
+                        adj[n1].append((n2, lqi))
+                        adj[n2].append((n1, lqi))
                 else:
                     links.append({"from": n1, "to": n2, "lqi": 0.0, "status": "DISCONNECTED"})
                     
