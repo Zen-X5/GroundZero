@@ -146,13 +146,7 @@ export function App() {
             <span>Drone Fleet ({drones.length})</span>
           </div>
 
-          <div 
-            className={`saas-nav-item ${activeTab === 'BUILDINGS' ? 'active' : ''}`}
-            onClick={() => setActiveTab('BUILDINGS')}
-          >
-            <Building2 size={18} className="nav-icon" />
-            <span>Building Voids ({buildings.length})</span>
-          </div>
+
 
           <div 
             className={`saas-nav-item ${activeTab === 'QUEUE' ? 'active' : ''}`}
@@ -228,19 +222,7 @@ export function App() {
             </div>
           )}
 
-          {activeTab === 'BUILDINGS' && (
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              <div style={{ marginBottom: '20px' }}>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '0.02em' }}>
-                  Collapsed Structure Openings & Balcony Voids
-                </h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Accessibility surveys and thermal venting scores per structure (concrete void perimeter inspections).
-                </p>
-              </div>
-              <BuildingCards buildings={buildings} />
-            </div>
-          )}
+
 
           {activeTab === 'QUEUE' && (
             <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
