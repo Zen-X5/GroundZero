@@ -170,6 +170,7 @@ export function App() {
               <TacticalDisasterMap
                 drones={drones}
                 survivors={survivors}
+                topology={topology}
                 onSelectSurvivor={(s) => setSelectedSurvivor(s)}
               />
             )}
