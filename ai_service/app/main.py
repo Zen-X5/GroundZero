@@ -45,6 +45,13 @@ class RiskCalculationRequest(BaseModel):
     floodRisingRateMPerHr: float = 0.2
     timeElapsedMins: float = 0.0
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage]
+
 @app.get("/")
 def root():
     return {"service": settings.PROJECT_NAME, "status": "ONLINE"}
@@ -52,6 +59,31 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "HEALTHY", "backend_url": settings.BACKEND_API_URL}
+
+@app.post("/api/chat")
+async def chat_endpoint(req: ChatRequest):
+    from app.agent.graph import command_agent
+    from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+    
+    # Convert incoming dicts to LangChain message objects
+    formatted_messages = []
+    for m in req.messages:
+        if m.role == "user":
+            formatted_messages.append(HumanMessage(content=m.content))
+        elif m.role == "assistant":
+            formatted_messages.append(AIMessage(content=m.content))
+        elif m.role == "system":
+            formatted_messages.append(SystemMessage(content=m.content))
+            
+    # Invoke LangGraph agent
+    try:
+        final_state = await command_agent.ainvoke({"messages": formatted_messages})
+        # Extract the final AI message from the state
+        final_message = final_state["messages"][-1].content
+        return {"reply": final_message}
+    except Exception as e:
+        logger.error(f"Agent execution error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/ai/fuse-observation")
 def fuse_observation(obs: SensorObservation):

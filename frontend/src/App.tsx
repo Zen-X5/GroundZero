@@ -7,6 +7,7 @@ import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
 import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
+import CommandAgent from './components/CommandAgent';
 import { getSocket } from '../lib/services/socket';
 import {
   useGetDronesQuery,
@@ -252,6 +253,7 @@ export function App() {
         survivor={selectedSurvivor}
         onClose={() => setSelectedSurvivor(null)}
       />
+      <CommandAgent />
     </div>
   );
 }
