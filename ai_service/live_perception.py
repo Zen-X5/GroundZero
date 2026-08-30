@@ -29,15 +29,15 @@ import os
 BACKEND_URL = os.environ.get("BACKEND_URL")
 if not BACKEND_URL:
     try:
-        if os.path.exists('/etc/resolv.conf'):
-            with open('/etc/resolv.conf', 'r') as f:
-                for line in f:
-                    if line.strip().startswith('nameserver'):
-                        ns_ip = line.split()[1].strip()
-                        BACKEND_URL = f"http://{ns_ip}:3000"
-                        break
+        # Get the actual WSL 2 host IP using ip route
+        import subprocess
+        ns_ip = subprocess.check_output("ip route show default | awk '{print $3}'", shell=True).decode('utf-8').strip()
+        if ns_ip:
+            BACKEND_URL = f"http://{ns_ip}:3000"
+        else:
+            BACKEND_URL = "http://172.24.128.1:3000"
     except Exception:
-        pass
+        BACKEND_URL = "http://172.24.128.1:3000"
 
 if not BACKEND_URL:
     BACKEND_URL = "http://localhost:3000"
@@ -165,7 +165,6 @@ class MultiSpectralPerceptionNode(Node):
         self.known_survivors = set()
         self.edge_cache = [] # local cache queue for isolated links
 
-        # Phase 5 Building Configurations & Inspection status
         self.buildings = {
             'urban_building_1_apartments': {
                 'position': {'x': 155.0, 'y': 32.0, 'z': 5.0},
@@ -189,6 +188,43 @@ class MultiSpectralPerceptionNode(Node):
                 'inspectionStatus': 'UNINSPECTED',
                 'accessibleOpenings': [
                     {'openingId': 'glass_facade_fl2', 'floorLevel': 2, 'dimensionsMeters': [10.0, 2.5], 'isObstructed': False, 'detectedOccupants': 0, 'openingType': 'WINDOW', 'inspectionConfidence': 0.0, 'position': {'x': 148.0, 'y': 74.0, 'z': 7.0}}
+                ],
+                'inspectionDrones': [],
+                'surveyedAngles': [],
+                'last_push_time': 0.0
+            },
+            'urban_building_4_warehouse': {
+                'position': {'x': 182.0, 'y': 72.0, 'z': 3.0},
+                'heightMeters': 6.0,
+                'floors': 1,
+                'structuralDamage': 'HIGH',
+                'inspectionStatus': 'UNINSPECTED',
+                'accessibleOpenings': [],
+                'inspectionDrones': [],
+                'surveyedAngles': [],
+                'last_push_time': 0.0
+            },
+            'urban_building_5_clinic': {
+                'position': {'x': 138.0, 'y': 48.0, 'z': 5.0},
+                'heightMeters': 10.0,
+                'floors': 2,
+                'structuralDamage': 'LOW',
+                'inspectionStatus': 'UNINSPECTED',
+                'accessibleOpenings': [
+                    {'openingId': 'clinic_entrance', 'floorLevel': 1, 'dimensionsMeters': [4.0, 2.0], 'isObstructed': False, 'detectedOccupants': 0, 'openingType': 'DOOR', 'inspectionConfidence': 0.0, 'position': {'x': 138.0, 'y': 45.0, 'z': 1.0}}
+                ],
+                'inspectionDrones': [],
+                'surveyedAngles': [],
+                'last_push_time': 0.0
+            },
+            'urban_building_6_bank': {
+                'position': {'x': 168.0, 'y': 54.0, 'z': 6.0},
+                'heightMeters': 12.0,
+                'floors': 3,
+                'structuralDamage': 'MODERATE',
+                'inspectionStatus': 'UNINSPECTED',
+                'accessibleOpenings': [
+                    {'openingId': 'bank_window', 'floorLevel': 2, 'dimensionsMeters': [5.0, 1.5], 'isObstructed': False, 'detectedOccupants': 0, 'openingType': 'WINDOW', 'inspectionConfidence': 0.0, 'position': {'x': 168.0, 'y': 50.0, 'z': 5.0}}
                 ],
                 'inspectionDrones': [],
                 'surveyedAngles': [],
@@ -333,9 +369,9 @@ class MultiSpectralPerceptionNode(Node):
                     }
                     try:
                         url = f"{BACKEND_URL}/buildings/{b_name}/inspection"
-                        requests.post(url, json=payload, timeout=0.8)
-                    except Exception:
-                        pass
+                        requests.post(url, json=payload, timeout=5.0)
+                    except Exception as e:
+                        self.get_logger().error(f" [API ERROR] Building POST failed: {e}")
 
     def rgb_callback(self, msg, drone_name):
         try:
@@ -516,12 +552,12 @@ class MultiSpectralPerceptionNode(Node):
                             pass
                 # Post the new observation
                 try:
-                    requests.post(f"{BACKEND_URL}/survivors/detection", json=payload, timeout=0.8)
+                    requests.post(f"{BACKEND_URL}/survivors/detection", json=payload, timeout=5.0)
                     if surv_code not in self.known_survivors:
                         self.known_survivors.add(surv_code)
                         self.get_logger().info(f" [NEW TARGET] Pushed {surv_code} at ({coords['x']}m, {coords['y']}m) with Risk {risk_val} to NestJS Backend!")
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.get_logger().error(f" [API ERROR] Survivor POST failed: {e}")
 
         # 5. Continuous Swarm Telemetry Sync (every 0.5s)
         if curr_time - self.last_telemetry_push_time > 0.5:
@@ -548,9 +584,9 @@ class MultiSpectralPerceptionNode(Node):
                     "connectedPeers": ["DRONE_2"] if "1" in d_name else (["DRONE_1", "DRONE_3"] if "2" in d_name else ["DRONE_2", "GROUND_STATION"])
                 }
                 try:
-                    requests.post(f"{BACKEND_URL}/drones/telemetry", json=telemetry_payload, timeout=0.4)
-                except Exception:
-                    pass
+                    requests.post(f"{BACKEND_URL}/drones/telemetry", json=telemetry_payload, timeout=5.0)
+                except Exception as e:
+                    self.get_logger().error(f" [API ERROR] Telemetry POST failed: {e}")
 
     def handle_key(self, key):
         global active_drone_selected
