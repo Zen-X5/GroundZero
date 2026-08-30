@@ -7,6 +7,7 @@ import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
 import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
+import { TDoASimulation3D } from './components/TDoASimulation3D';
 import { MacroSatelliteMap } from './components/MacroSatelliteMap';
 import CommandAgent from './components/CommandAgent';
 import { getSocket } from '../lib/services/socket';
@@ -125,7 +126,7 @@ export function App() {
         </div>
 
         <nav className="saas-nav-list">
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'MAP' ? 'active' : ''}`}
             onClick={() => setActiveTab('MAP')}
           >
@@ -149,7 +150,7 @@ export function App() {
             <span>Multi-Spectral HUD</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'FLEET' ? 'active' : ''}`}
             onClick={() => setActiveTab('FLEET')}
           >
@@ -159,7 +160,7 @@ export function App() {
 
 
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'QUEUE' ? 'active' : ''}`}
             onClick={() => setActiveTab('QUEUE')}
           >
@@ -167,7 +168,7 @@ export function App() {
             <span>Rescue Queue ({survivors.length})</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'MANET' ? 'active' : ''}`}
             onClick={() => setActiveTab('MANET')}
           >
@@ -175,13 +176,22 @@ export function App() {
             <span>MANET Topology</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'ALERTS' ? 'active' : ''}`}
             onClick={() => setActiveTab('ALERTS')}
           >
             <Bell size={18} className="nav-icon" />
             <span>Disaster Feed ({alerts.length})</span>
           </div>
+
+          <div
+            className={`saas-nav-item ${activeTab === 'TDOA' ? 'active' : ''}`}
+            onClick={() => setActiveTab('TDOA')}
+          >
+            <Radio size={18} className="nav-icon" />
+            <span>TDoA Simulation</span>
+          </div>
+
         </nav>
 
         <div className="saas-sidebar-footer">
@@ -261,6 +271,13 @@ export function App() {
               <AlertFeed alerts={alerts} />
             </div>
           )}
+
+          {activeTab === 'TDOA' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)' }}>
+              <TDoASimulation3D />
+            </div>
+          )}
+
         </div>
       </main>
 
