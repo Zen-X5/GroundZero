@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SurvivorQueue } from './components/SurvivorQueue';
 import { DroneGrid } from './components/DroneGrid';
-import { BuildingCards } from './components/BuildingCards';
 import { NetworkStatus } from './components/NetworkStatus';
 import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
@@ -9,6 +8,8 @@ import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
 import { TDoASimulation3D } from './components/TDoASimulation3D';
 import { MacroSatelliteMap } from './components/MacroSatelliteMap';
+import { Dashboard } from './components/Dashboard';
+import { Loading } from './components/Loading';
 import CommandAgent from './components/CommandAgent';
 import { getSocket } from '../lib/services/socket';
 import {
@@ -18,83 +19,106 @@ import {
   useGetBuildingsQuery,
 } from '../lib/store/apiSlice';
 import { Survivor, SystemAlert } from '../lib/types';
-import { 
-  Map, 
-  Camera, 
-  Radio, 
-  Building2, 
-  Users, 
-  Wifi, 
-  Bell, 
-  Activity, 
-  ShieldCheck,
-  Satellite
+import {
+  LayoutDashboard,
+  Map,
+  Camera,
+  Radio,
+  Users,
+  Wifi,
+  Bell,
+  Activity,
+  Satellite,
+  TrendingUp,
 } from 'lucide-react';
+
+type Tab = 'HOME' | 'MAP' | 'SATELLITE' | 'HUD' | 'FLEET' | 'QUEUE' | 'MANET' | 'ALERTS' | 'TDOA';
+
+// Page metadata: title, subtitle, and breadcrumb for each tab
+const PAGE_META: Record<Tab, { title: string; subtitle: string; crumb: string }> = {
+  HOME: { title: 'Mission Overview', subtitle: 'Live KPIs and situational awareness for the active rescue operation.', crumb: 'Dashboard' },
+  MAP: { title: 'Tactical Disaster Map', subtitle: 'Real-time 2D/3D drone positions, survivor heatmap, and sector coverage.', crumb: 'Intelligence › Tactical Map' },
+  SATELLITE: { title: 'Satellite Intel', subtitle: 'Live Sentinel-2 flood classification using NDWI and drone deployment zones.', crumb: 'Intelligence › Satellite Intel' },
+  HUD: { title: 'Multi-Spectral HUD', subtitle: 'RGB + thermal camera feed from the selected active drone.', crumb: 'Intelligence › Multi-Spectral HUD' },
+  FLEET: { title: 'Drone Fleet Telemetry', subtitle: 'Real-time battery, altitude, speed, and mesh status for all swarm nodes.', crumb: 'Operations › Drone Fleet' },
+  QUEUE: { title: 'Rescue Priority Queue', subtitle: 'AI-ranked survivors sorted by risk score, confidence, and environment type.', crumb: 'Operations › Rescue Queue' },
+  MANET: { title: 'MANET Mesh Topology', subtitle: 'Ad-hoc aerial communication network — link quality and relay node status.', crumb: 'Network › MANET Topology' },
+  ALERTS: { title: 'Disaster Event Feed', subtitle: 'Sensor-triggered system alerts and live global seismic data from USGS.', crumb: 'Network › Disaster Feed' },
+  TDOA: { title: 'TDoA Geolocation Simulation', subtitle: 'Time-difference-of-arrival RF multilateration for survivor phone triangulation.', crumb: 'Operations › TDoA Simulation' },
+};
+
+// Sidebar nav group definitions
+const NAV_GROUPS = [
+  {
+    label: 'Overview',
+    items: [
+      { tab: 'HOME' as Tab, label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { tab: 'MAP' as Tab, label: 'Tactical Map', icon: Map },
+      { tab: 'SATELLITE' as Tab, label: 'Satellite Intel', icon: Satellite },
+      { tab: 'HUD' as Tab, label: 'Multi-Spectral HUD', icon: Camera },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { tab: 'FLEET' as Tab, label: 'Drone Fleet', icon: Radio },
+      { tab: 'QUEUE' as Tab, label: 'Rescue Queue', icon: Users },
+      { tab: 'TDOA' as Tab, label: 'TDoA Simulation', icon: TrendingUp },
+    ],
+  },
+  {
+    label: 'Network',
+    items: [
+      { tab: 'MANET' as Tab, label: 'MANET Topology', icon: Wifi },
+      { tab: 'ALERTS' as Tab, label: 'Disaster Feed', icon: Bell },
+    ],
+  },
+];
 
 export function App() {
   const [connected, setConnected] = useState(false);
   const [selectedSurvivor, setSelectedSurvivor] = useState<Survivor | null>(null);
-  const [activeTab, setActiveTab] = useState<'MAP' | 'SATELLITE' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS'>('MAP');
+  const [activeTab, setActiveTab] = useState<Tab>('HOME');
   const [activeDrone, setActiveDrone] = useState<string>('drone_2');
 
-  // RTK Query Hooks with Automated Tag Caching & WebSocket Streaming
-  const { data: drones = [] } = useGetDronesQuery();
-  const { data: survivors = [] } = useGetSurvivorsQuery();
+  const { data: drones = [], isLoading: isLoadingDrones } = useGetDronesQuery();
+  const { data: survivors = [], isLoading: isLoadingSurvivors } = useGetSurvivorsQuery();
   const { data: topology = null } = useGetTopologyQuery();
   const { data: buildings = [] } = useGetBuildingsQuery();
 
   const [alerts, setAlerts] = useState<SystemAlert[]>([
-    {
-      id: '1',
-      level: 'CRITICAL',
-      title: 'Ground-Zero Blackout Active',
-      message: 'Cellular grid offline. Aerial MANET mesh restored across Sectors A, B, C.',
-      timestamp: '00:01 UTC',
-    },
-    {
-      id: '2',
-      level: 'WARNING',
-      title: 'Sector A Flood Lake Rising',
-      message: 'Water rising at 0.25m/hr. Priority queue updating for low-altitude perches.',
-      timestamp: '00:02 UTC',
-    },
+    { id: '1', level: 'CRITICAL', title: 'Ground-Zero Blackout Active', message: 'Cellular grid offline. Aerial MANET mesh restored across Sectors A, B, C.', timestamp: '00:01 UTC' },
+    { id: '2', level: 'WARNING', title: 'Sector A Flood Lake Rising', message: 'Water rising at 0.25m/hr. Priority queue updating for low-altitude perches.', timestamp: '00:02 UTC' },
   ]);
 
   useEffect(() => {
     const socket = getSocket();
-
-    socket.on('connect', () => {
-      setConnected(true);
-    });
-
-    socket.on('disconnect', () => {
-      setConnected(false);
-    });
+    socket.on('connect', () => setConnected(true));
+    socket.on('disconnect', () => setConnected(false));
 
     socket.on('detection:survivor', (survivor: Survivor) => {
-      setAlerts((prev) => [
-        {
-          id: String(Date.now()),
-          level: survivor.riskScore >= 80 ? 'CRITICAL' : 'WARNING',
-          title: `Survivor Target: ${survivor.code}`,
-          message: `Detected at (${survivor.globalPosition.x.toFixed(0)}m, ${survivor.globalPosition.y.toFixed(0)}m) - Risk ${survivor.riskScore.toFixed(1)} / Priority #${survivor.rescuePriorityRank || 1}`,
-          timestamp: new Date().toTimeString().split(' ')[0],
-        },
-        ...prev.slice(0, 15),
-      ]);
+      setAlerts(prev => [{
+        id: String(Date.now()),
+        level: survivor.riskScore >= 80 ? 'CRITICAL' : 'WARNING',
+        title: `Survivor Target: ${survivor.code}`,
+        message: `Detected at (${survivor.globalPosition.x.toFixed(0)}m, ${survivor.globalPosition.y.toFixed(0)}m) - Risk ${survivor.riskScore.toFixed(1)} / Priority #${survivor.rescuePriorityRank || 1}`,
+        timestamp: new Date().toTimeString().split(' ')[0],
+      }, ...prev.slice(0, 15)]);
     });
 
     socket.on('system:alert', (alert: any) => {
-      setAlerts((prev) => [
-        {
-          id: String(Date.now()),
-          level: alert.level || 'INFO',
-          title: alert.title || 'System Alert',
-          message: alert.message || '',
-          timestamp: new Date().toTimeString().split(' ')[0],
-        },
-        ...prev.slice(0, 15),
-      ]);
+      setAlerts(prev => [{
+        id: String(Date.now()),
+        level: alert.level || 'INFO',
+        title: alert.title || 'System Alert',
+        message: alert.message || '',
+        timestamp: new Date().toTimeString().split(' ')[0],
+      }, ...prev.slice(0, 15)]);
     });
 
     return () => {
@@ -105,183 +129,206 @@ export function App() {
     };
   }, []);
 
-  const criticalCount = survivors.filter((s) => s.riskScore >= 80).length;
+  const criticalCount = alerts.filter(a => a.level === 'CRITICAL').length;
+  const meta = PAGE_META[activeTab] || { title: '404 - Subsystem Lost', subtitle: 'Requested resource is offline or outside current swarm boundary.', crumb: 'Error' };
 
   return (
     <div className="saas-container">
-      {/* Left Navigation Sidebar */}
+
       <aside className="saas-sidebar">
         <div className="saas-logo-area">
           <div className="saas-logo-icon">
-            <Activity size={20} color="#fff" />
+            <Activity size={16} color="#fff" />
           </div>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 800, color: '#fff', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '0.02em' }}>
               GROUND-ZERO
-            </h1>
-            <span style={{ fontSize: '0.62rem', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+            </div>
+            <div style={{ fontSize: '0.6rem', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
               AI SWARM RESCUE
-            </span>
+            </div>
           </div>
         </div>
 
+        {/* Grouped navigation */}
         <nav className="saas-nav-list">
-          <div
-            className={`saas-nav-item ${activeTab === 'MAP' ? 'active' : ''}`}
-            onClick={() => setActiveTab('MAP')}
-          >
-            <Map size={18} className="nav-icon" />
-            <span>Tactical Map</span>
-          </div>
+          {NAV_GROUPS.map(group => (
+            <div key={group.label} style={{ marginBottom: '8px' }}>
+              {/* Group label */}
+              <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '6px 12px 4px' }}>
+                {group.label}
+              </div>
+              {group.items.map(item => {
+                const Icon = item.icon;
+                // Count badges
+                const badge =
+                  item.tab === 'ALERTS' && criticalCount > 0 ? criticalCount :
+                    item.tab === 'QUEUE' && survivors.length > 0 ? survivors.length :
+                      item.tab === 'FLEET' && drones.length > 0 ? drones.length : null;
 
-          <div 
-            className={`saas-nav-item ${activeTab === 'SATELLITE' ? 'active' : ''}`}
-            onClick={() => setActiveTab('SATELLITE')}
-          >
-            <Satellite size={18} className="nav-icon" />
-            <span>Satellite Intel</span>
-          </div>
-
-          <div 
-            className={`saas-nav-item ${activeTab === 'HUD' ? 'active' : ''}`}
-            onClick={() => setActiveTab('HUD')}
-          >
-            <Camera size={18} className="nav-icon" />
-            <span>Multi-Spectral HUD</span>
-          </div>
-
-          <div
-            className={`saas-nav-item ${activeTab === 'FLEET' ? 'active' : ''}`}
-            onClick={() => setActiveTab('FLEET')}
-          >
-            <Radio size={18} className="nav-icon" />
-            <span>Drone Fleet ({drones.length})</span>
-          </div>
-
-
-
-          <div
-            className={`saas-nav-item ${activeTab === 'QUEUE' ? 'active' : ''}`}
-            onClick={() => setActiveTab('QUEUE')}
-          >
-            <Users size={18} className="nav-icon" />
-            <span>Rescue Queue ({survivors.length})</span>
-          </div>
-
-          <div
-            className={`saas-nav-item ${activeTab === 'MANET' ? 'active' : ''}`}
-            onClick={() => setActiveTab('MANET')}
-          >
-            <Wifi size={18} className="nav-icon" />
-            <span>MANET Topology</span>
-          </div>
-
-          <div
-            className={`saas-nav-item ${activeTab === 'ALERTS' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ALERTS')}
-          >
-            <Bell size={18} className="nav-icon" />
-            <span>Disaster Feed ({alerts.length})</span>
-          </div>
-
-          <div
-            className={`saas-nav-item ${activeTab === 'TDOA' ? 'active' : ''}`}
-            onClick={() => setActiveTab('TDOA')}
-          >
-            <Radio size={18} className="nav-icon" />
-            <span>TDoA Simulation</span>
-          </div>
-
+                return (
+                  <div
+                    key={item.tab}
+                    className={`saas-nav-item ${activeTab === item.tab ? 'active' : ''}`}
+                    onClick={() => setActiveTab(item.tab)}
+                  >
+                    <Icon size={16} className="nav-icon" />
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {badge !== null && (
+                      <span style={{
+                        fontSize: '0.62rem', fontWeight: 700,
+                        minWidth: '18px', height: '18px', borderRadius: '9px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: item.tab === 'ALERTS' ? '#fef2f2' : '#eff6ff',
+                        color: item.tab === 'ALERTS' ? '#ef4444' : '#2563eb',
+                        border: item.tab === 'ALERTS' ? '1px solid #fecaca' : '1px solid #bfdbfe',
+                        padding: '0 4px',
+                      }}>
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
+        {/* Footer */}
         <div className="saas-sidebar-footer">
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div className={`live-dot ${connected ? 'green' : 'red'}`} />
-            <span style={{ color: connected ? 'var(--text-main)' : 'var(--accent-crimson)', fontWeight: 700 }}>
+            <span style={{ color: connected ? 'var(--green)' : 'var(--red)', fontWeight: 600, fontSize: '0.72rem' }}>
               {connected ? 'LINK ONLINE' : 'DISCONNECTED'}
             </span>
           </div>
-          <span style={{ fontSize: '0.62rem' }}>Prakriti Avinya 2026</span>
+          <span>Prakriti Avinya 2026</span>
         </div>
       </aside>
 
-      {/* Right Main Panel Workspace */}
       <main className="saas-main-content">
-        <div className="saas-workspace">
-          {activeTab === 'MAP' && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)' }}>
-              <TacticalDisasterMap
-                drones={drones}
-                survivors={survivors}
-                topology={topology}
-                buildings={buildings}
-                onSelectSurvivor={(s) => setSelectedSurvivor(s)}
-              />
-            </div>
-          )}
 
-          {activeTab === 'SATELLITE' && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', padding: '20px' }}>
-              <MacroSatelliteMap />
+        {/* Per-page header */}
+        <div style={{ padding: '16px 24px 0', borderBottom: '1px solid var(--border)', background: '#fff', flexShrink: 0 }}>
+          {/* Breadcrumb */}
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>
+            Ground-Zero › {meta.crumb}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: '14px' }}>
+            <div>
+              <h1 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '2px' }}>
+                {meta.title}
+              </h1>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{meta.subtitle}</p>
             </div>
-          )}
-
-          {activeTab === 'HUD' && (
-            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
-              <MultiSpectralHUD
-                activeDrone={activeDrone}
-                onSelectDrone={(d) => setActiveDrone(d)}
-              />
-            </div>
-          )}
-
-          {activeTab === 'FLEET' && (
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              <div style={{ marginBottom: '20px' }}>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '0.02em' }}>
-                  Swarm Telemetry Fleet Nodes
-                </h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Real-time health, altitude coordinates, and navigation speeds of active search quadcopters.
-                </p>
+            {/* Tab-specific action chips */}
+            {activeTab === 'MAP' && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: '#f0fdf4', color: '#22c55e', border: '1px solid #bbf7d0', fontWeight: 600 }}>
+                  {drones.length} Drones
+                </span>
+                <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', fontWeight: 600 }}>
+                  {survivors.length} Survivors
+                </span>
               </div>
-              <DroneGrid drones={drones} />
-            </div>
-          )}
+            )}
+            {activeTab === 'SATELLITE' && (
+              <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 600 }}>
+                📡 Copernicus Sentinel-2
+              </span>
+            )}
+            {activeTab === 'ALERTS' && criticalCount > 0 && (
+              <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', fontWeight: 600 }}>
+                🔴 {criticalCount} Critical
+              </span>
+            )}
+          </div>
+        </div>
 
+        {/* Tab content workspace */}
+        <div className="saas-workspace">
 
+          {(isLoadingDrones && drones.length === 0) || (isLoadingSurvivors && survivors.length === 0) ? (
+            <Loading message="Connecting to swarm data bridge..." />
+          ) : (
+            <>
+              {activeTab === 'HOME' && (
+                <Dashboard
+                  drones={drones}
+                  survivors={survivors}
+                  topology={topology}
+                  alerts={alerts}
+                  connected={connected}
+                  onNavigate={(tab) => setActiveTab(tab as Tab)}
+                />
+              )}
 
-          {activeTab === 'QUEUE' && (
-            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
-              <SurvivorQueue
-                survivors={survivors}
-                onSelectSurvivor={(s) => setSelectedSurvivor(s)}
-              />
-            </div>
-          )}
+              {activeTab === 'MAP' && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+                  <TacticalDisasterMap
+                    drones={drones}
+                    survivors={survivors}
+                    topology={topology}
+                    buildings={buildings}
+                    onSelectSurvivor={(s) => setSelectedSurvivor(s)}
+                  />
+                </div>
+              )}
 
-          {activeTab === 'MANET' && (
-            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
-              <NetworkStatus topology={topology} />
-            </div>
-          )}
+              {activeTab === 'SATELLITE' && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+                  <MacroSatelliteMap />
+                </div>
+              )}
 
-          {activeTab === 'ALERTS' && (
-            <div style={{ flex: 1, height: 'calc(100vh - 48px)' }}>
-              <AlertFeed alerts={alerts} />
-            </div>
-          )}
+              {activeTab === 'HUD' && (
+                <div style={{ flex: 1, height: 'calc(100vh - 120px)' }}>
+                  <MultiSpectralHUD
+                    activeDrone={activeDrone}
+                    onSelectDrone={(d) => setActiveDrone(d)}
+                  />
+                </div>
+              )}
 
-          {activeTab === 'TDOA' && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)' }}>
-              <TDoASimulation3D />
-            </div>
+              {activeTab === 'FLEET' && (
+                <div style={{ flex: 1, height: 'calc(100vh - 120px)' }}>
+                  <DroneGrid drones={drones} />
+                </div>
+              )}
+
+              {activeTab === 'QUEUE' && (
+                <div style={{ flex: 1, height: 'calc(100vh - 120px)' }}>
+                  <SurvivorQueue
+                    survivors={survivors}
+                    onSelectSurvivor={(s) => setSelectedSurvivor(s)}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'MANET' && (
+                <div style={{ flex: 1, height: 'calc(100vh - 120px)' }}>
+                  <NetworkStatus topology={topology} />
+                </div>
+              )}
+
+              {activeTab === 'ALERTS' && (
+                <div style={{ flex: 1, height: 'calc(100vh - 120px)' }}>
+                  <AlertFeed alerts={alerts} />
+                </div>
+              )}
+
+              {activeTab === 'TDOA' && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+                  <TDoASimulation3D />
+                </div>
+              )}
+
+            </>
           )}
 
         </div>
       </main>
 
-      {/* Explainable AI Detail Modal */}
       <SurvivorDetailModal
         survivor={selectedSurvivor}
         onClose={() => setSelectedSurvivor(null)}

@@ -90,21 +90,21 @@ export const MultiSpectralHUD: React.FC<MultiSpectralHUDProps> = ({
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <Camera size={18} color="var(--accent-cyan)" />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <Camera size={18} color="#2563eb" />
+          <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
             Multi-Spectral Aerial Feed
           </h2>
           <span className="badge-cyan" style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: '4px' }}>DUAL RGB + LWIR</span>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '5px',
             padding: '2px 8px', borderRadius: '4px',
-            background: streamState === 'live' ? 'rgba(16,185,129,0.1)' : streamState === 'connecting' ? 'rgba(0,240,255,0.08)' : 'rgba(239,68,68,0.1)',
-            border: `1px solid ${streamState === 'live' ? 'rgba(16,185,129,0.35)' : streamState === 'connecting' ? 'rgba(0,240,255,0.28)' : 'rgba(239,68,68,0.35)'}`,
+            background: streamState === 'live' ? '#f0fdf4' : streamState === 'connecting' ? '#eff6ff' : '#fef2f2',
+            border: `1px solid ${streamState === 'live' ? '#bbf7d0' : streamState === 'connecting' ? '#bfdbfe' : '#fecaca'}`,
           }}>
             {streamState === 'live'
-              ? <><Wifi     size={10} color="var(--accent-emerald)" /><span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-emerald)', fontWeight: 700, marginLeft: '4px' }}>LIVE{fps > 0 ? ` ${fps} FPS` : ''}</span></>
+              ? <><Wifi     size={10} color="#22c55e" /><span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#22c55e', fontWeight: 700, marginLeft: '4px' }}>LIVE{fps > 0 ? ` ${fps} FPS` : ''}</span></>
               : streamState === 'connecting'
-              ? <><Activity size={10} color="var(--accent-cyan)"    /><span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)',    fontWeight: 700, marginLeft: '4px' }}>CONNECTING</span></>
+              ? <><Activity size={10} color="#2563eb"    /><span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#2563eb',    fontWeight: 700, marginLeft: '4px' }}>CONNECTING</span></>
               : <><WifiOff  size={10} color="#ef4444"               /><span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#ef4444',              fontWeight: 700, marginLeft: '4px' }}>OFFLINE</span></>
             }
           </div>
@@ -117,13 +117,25 @@ export const MultiSpectralHUD: React.FC<MultiSpectralHUDProps> = ({
               key={d.id}
               onClick={() => handleDroneSwitch(d.id)}
               style={{
-                padding: '5px 10px', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 600,
+                padding: '6px 12px', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 600,
                 borderRadius: '6px',
-                border: activeDrone === d.id ? `1px solid ${d.color}` : '1px solid var(--border-subtle)',
-                background: activeDrone === d.id ? `${d.color}22` : 'rgba(0,0,0,0.3)',
-                color: activeDrone === d.id ? '#fff' : 'var(--text-muted)',
-                cursor: 'pointer', transition: 'all 0.18s ease',
-                boxShadow: activeDrone === d.id ? `0 0 12px ${d.color}40` : 'none',
+                border: activeDrone === d.id ? '1px solid #2563eb' : '1px solid #e2e8f0',
+                background: activeDrone === d.id ? '#2563eb' : '#f8fafc',
+                color: activeDrone === d.id ? '#fff' : '#475569',
+                cursor: 'pointer', transition: 'all 0.15s ease',
+                boxShadow: activeDrone === d.id ? '0 2px 4px rgba(37, 99, 235, 0.15)' : 'none',
+              }}
+              onMouseEnter={e => {
+                if (activeDrone !== d.id) {
+                  e.currentTarget.style.background = '#f1f5f9';
+                  e.currentTarget.style.color = '#0f172a';
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeDrone !== d.id) {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.color = '#475569';
+                }
               }}
             >{d.label}</button>
           ))}

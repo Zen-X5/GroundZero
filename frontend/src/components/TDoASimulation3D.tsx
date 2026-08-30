@@ -1,23 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { 
-  Play, 
-  RefreshCw, 
-  MapPin, 
-  Activity, 
-  Radio, 
-  Wifi, 
-  TrendingUp, 
-  CheckCircle2, 
+import {
+  Play,
+  RefreshCw,
+  MapPin,
+  Radio,
+  Wifi,
+  TrendingUp,
   Info,
   Clock,
   Compass
 } from 'lucide-react';
 
-// ------------------------------------------------------------------
-// Math Constants & Helpers for Local Geolocation Solver Fallback
-// ------------------------------------------------------------------
 const C = 3e8; // speed of light, m/s
 const EARTH_RADIUS = 6371000.0;
 
@@ -25,8 +20,8 @@ function haversineDistanceJS(lat1: number, lon1: number, lat2: number, lon2: num
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) ** 2;
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.asin(Math.sqrt(a));
   return EARTH_RADIUS * c;
 }
@@ -306,7 +301,7 @@ export function TDoASimulation3D() {
   const mountRef = useRef<HTMLDivElement>(null);
   const [selectedHouse, setSelectedHouse] = useState(HOUSES[0]);
   const [selectedUser, setSelectedUser] = useState(HOUSES[0].networks.filter(n => n.device === 'smartphone')[0].username);
-  
+
   const [isSimulating, setIsSimulating] = useState(false);
   const [animationStep, setAnimationStep] = useState<string>('Idle');
   const [beacons, setBeacons] = useState<BeaconRecord[]>([]);
@@ -391,10 +386,10 @@ export function TDoASimulation3D() {
 
     // Dark ground base
     const groundGeo = new THREE.PlaneGeometry(500, 500);
-    const groundMat = new THREE.MeshStandardMaterial({ 
-      color: 0x091424, 
-      roughness: 0.9, 
-      metalness: 0.7 
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x091424,
+      roughness: 0.9,
+      metalness: 0.7
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
@@ -452,7 +447,7 @@ export function TDoASimulation3D() {
         transparent: true,
         opacity: 0.9
       });
-      
+
       // Front window
       const winF = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), windowMat);
       winF.position.set(0, 6.0, 6.01);
@@ -663,7 +658,7 @@ export function TDoASimulation3D() {
     };
 
     const onMouseUp = () => { isDragging = false; };
-    
+
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       camState.r = Math.max(80, Math.min(380, camState.r + e.deltaY * 0.2));
@@ -710,13 +705,13 @@ export function TDoASimulation3D() {
           const angle = clock * 0.15 + idx * 2.1;
           const radius = idx === 0 ? 25 : idx === 1 ? 20 : 30;
           const center = latLonToThree(d.lat, d.lon);
-          
+
           const targetX = center.x + Math.cos(angle) * radius;
           const targetZ = center.z + Math.sin(angle) * radius;
-          
+
           drone.position.x = THREE.MathUtils.lerp(drone.position.x, targetX, 0.05);
           drone.position.z = THREE.MathUtils.lerp(drone.position.z, targetZ, 0.05);
-          
+
           // Hover bobbing
           drone.position.y = 25.0 + Math.sin(clock * 2.0 + idx) * 0.5;
 
@@ -732,12 +727,12 @@ export function TDoASimulation3D() {
       if (houseGroup) {
         // Selected house position (indicator height ~13.5)
         const hPos = new THREE.Vector3(houseGroup.position.x, 13.5, houseGroup.position.z);
-        
+
         DEFAULT_DRONES.forEach((d, idx) => {
           const drone = dronesRef.current.get(d.id);
           if (drone) {
             const dPos = new THREE.Vector3(drone.position.x, drone.position.y - 0.5, drone.position.z);
-            
+
             // 1. Update the straight line geometry
             const lineMesh = scene.getObjectByName(`line_${d.id}`) as THREE.Line;
             if (lineMesh) {
@@ -747,18 +742,18 @@ export function TDoASimulation3D() {
               pos.needsUpdate = true;
               lineMesh.computeLineDistances(); // required for dashed lines
             }
-            
+
             // 2. Update the position of the moving dots (packets) along the line
             for (let i = 0; i < 5; i++) {
               const dotMesh = scene.getObjectByName(`dot_${d.id}_${i}`) as THREE.Mesh;
               if (dotMesh) {
                 // Determine phase. We use clock for animation phase
                 let phase = (clock * 0.5 + i / 5) % 1.0;
-                
+
                 // Lerp between house and drone
                 const currentPos = new THREE.Vector3().lerpVectors(hPos, dPos, phase);
                 dotMesh.position.copy(currentPos);
-                
+
                 // Fade out near the ends for smooth appearance
                 if (dotMesh.material instanceof THREE.MeshBasicMaterial) {
                   const edgeFade = Math.sin(phase * Math.PI); // peak at center, 0 at ends
@@ -772,7 +767,7 @@ export function TDoASimulation3D() {
 
       // Camera look target smoothing
       currentCamLookAt.current.lerp(
-        new THREE.Vector3(targetCamPos.current.x, 0, targetCamPos.current.z), 
+        new THREE.Vector3(targetCamPos.current.x, 0, targetCamPos.current.z),
         0.03
       );
       setCameraCoords();
@@ -789,7 +784,7 @@ export function TDoASimulation3D() {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       mount.removeEventListener('wheel', onWheel);
-      
+
       // dispose geometries/materials
       groundGeo.dispose();
       groundMat.dispose();
@@ -798,7 +793,7 @@ export function TDoASimulation3D() {
       ripGeo.dispose(); // Wait, ripGeo? Let's check below. Ah, it's ripMesh's geometry, which we will dispose
       ripMesh.geometry.dispose();
       ripMat.dispose();
-      
+
       renderer.dispose();
       if (mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);
@@ -822,7 +817,7 @@ export function TDoASimulation3D() {
 
     // 1. Clear previous curves and markers
     if (hyperbolasGroupRef.current) {
-      while(hyperbolasGroupRef.current.children.length > 0){
+      while (hyperbolasGroupRef.current.children.length > 0) {
         const child = hyperbolasGroupRef.current.children[0] as THREE.Line;
         child.geometry.dispose();
         (child.material as THREE.Material).dispose();
@@ -830,7 +825,7 @@ export function TDoASimulation3D() {
       }
     }
     if (convergenceMarkerRef.current) {
-      while(convergenceMarkerRef.current.children.length > 0){
+      while (convergenceMarkerRef.current.children.length > 0) {
         const child = convergenceMarkerRef.current.children[0];
         if (child instanceof THREE.Mesh) {
           child.geometry.dispose();
@@ -848,13 +843,13 @@ export function TDoASimulation3D() {
     });
 
     const houseCoords = latLonToThree(selectedHouse.lat, selectedHouse.lon);
-    
+
     // Smoothly focus camera lookAt on target house
     targetCamPos.current = { x: houseCoords.x, y: 150, z: houseCoords.z };
 
     // --- STEP 1: Ripple outward from survivor ---
     setAnimationStep('Step 1/5: Signal pulse ripple outward...');
-    
+
     const ripple = rippleRef.current;
     if (ripple) {
       ripple.position.set(houseCoords.x, 4.1, houseCoords.z); // rest at water level
@@ -887,10 +882,10 @@ export function TDoASimulation3D() {
       // Z = -(lat - LAT_CENTER) * 111320 / 10
       const currentX = grp ? grp.position.x : 0;
       const currentZ = grp ? grp.position.z : 0;
-      
+
       const lon = LON_CENTER + (currentX * 10) / (111139.0 * Math.cos(LAT_CENTER * Math.PI / 180));
       const lat = LAT_CENTER - (currentZ * 10) / 111320.0;
-      
+
       return { id: d.id, lat, lon };
     });
 
@@ -929,7 +924,7 @@ export function TDoASimulation3D() {
 
       const beaconId = `B-TDOA-${Math.floor(Math.random() * 900 + 100)}`;
       const confidence = error_m < 20 ? 'high' : error_m < 100 ? 'medium' : 'low';
-      
+
       // Generate hyperbolas
       const areaCenter = {
         lat: droneList.reduce((sum, d) => sum + d.lat, 0) / droneList.length,
@@ -1007,7 +1002,7 @@ export function TDoASimulation3D() {
           led.material.color.setHex(0xffaa00);
           led.material.emissive.setHex(0xff8800);
           led.material.emissiveIntensity = 4.0;
-          
+
           gsap.to(led.material.color, {
             r: ((originalColor >> 16) & 255) / 255,
             g: ((originalColor >> 8) & 255) / 255,
@@ -1038,20 +1033,20 @@ export function TDoASimulation3D() {
 
     for (let k = 0; k < keys.length; k++) {
       const key = keys[k];
-      
+
       // Get the two drones for this pair to construct the baseline
       const pairDrones = key.split('-');
       const dAMesh = dronesRef.current.get(pairDrones[0]);
       const dBMesh = dronesRef.current.get(pairDrones[1]);
-      
+
       const dA_pos = dAMesh ? { x: dAMesh.position.x, z: dAMesh.position.z } : { x: 0, z: 0 };
       const dB_pos = dBMesh ? { x: dBMesh.position.x, z: dBMesh.position.z } : { x: 0, z: 0 };
-      
+
       // Get the corresponding pairwise time difference
       const firstIdx = k === 0 ? 0 : k === 1 ? 0 : 1;
       const secondIdx = k === 0 ? 1 : k === 1 ? 2 : 2;
       const dt = data.arrivalTimes[firstIdx] - data.arrivalTimes[secondIdx];
-      
+
       // Generate perfectly smooth parametric points in Three.js space
       const threePoints = getHyperbolaPointsParametric(dA_pos, dB_pos, dt, 150);
 
@@ -1065,7 +1060,7 @@ export function TDoASimulation3D() {
       });
 
       const line = new THREE.Line(hyperbolaGeo, hyperbolaMat);
-      
+
       // Animate draw range
       hyperbolaGeo.setDrawRange(0, 0);
       hyperbolasGroupRef.current?.add(line);
@@ -1091,7 +1086,7 @@ export function TDoASimulation3D() {
 
     // --- STEP 4: Convergence point highlight ---
     setAnimationStep('Step 4/5: Computing multilateration intersection point...');
-    
+
     const estCoords = latLonToThree(data.estimatedPosition[0], data.estimatedPosition[1]);
 
     // Animate camera focusing closely on the convergence point
@@ -1139,7 +1134,7 @@ export function TDoASimulation3D() {
 
     // --- STEP 5: Geotag & append to beacon list ---
     setAnimationStep('Step 5/5: Estimated location geotagged! Beacon dispatched.');
-    
+
     const newBeacon: BeaconRecord = {
       beacon_id: data.beacon.beacon_id,
       lat: data.beacon.lat,
@@ -1156,7 +1151,7 @@ export function TDoASimulation3D() {
     // Hold visual convergence view for a second, then restore camera zoom out
     await new Promise(resolve => setTimeout(resolve, 1000));
     targetCamPos.current = { x: 0, y: 180, z: 120 };
-    
+
     setIsSimulating(false);
     isSimulatingRef.current = false;
     setAnimationStep('Done - Estimation Completed');
@@ -1165,7 +1160,7 @@ export function TDoASimulation3D() {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', background: '#05070c' }}>
-      
+
       {/* Simulation Header Overlay */}
       <div style={{
         padding: '16px 20px',
@@ -1179,8 +1174,8 @@ export function TDoASimulation3D() {
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Radio size={20} color="var(--accent-cyan)" className="animate-pulse" />
-            <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <Radio size={20} color="#2563eb" />
+            <h1 style={{ fontFamily: 'var(--font-sans)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>
               TDoA Geolocation Triangulation
             </h1>
           </div>
@@ -1194,13 +1189,13 @@ export function TDoASimulation3D() {
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid var(--border-subtle)',
+          background: isSimulating ? '#fffbeb' : '#f8fafc',
+          border: `1px solid ${isSimulating ? '#fde68a' : '#e2e8f0'}`,
           padding: '6px 14px',
           borderRadius: '6px'
         }}>
-          <div className={`live-dot ${isSimulating ? 'yellow animate-ping' : 'green'}`} />
-          <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: isSimulating ? 'var(--accent-amber)' : 'var(--text-main)' }}>
+          <div className={`live-dot ${isSimulating ? '' : 'green'}`} style={isSimulating ? { background: '#f59e0b' } : {}} />
+          <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: isSimulating ? '#92400e' : 'var(--text-main)' }}>
             STATUS: {isSimulating ? animationStep.toUpperCase() : 'AWAITING TRIGGER'}
           </span>
         </div>
@@ -1208,7 +1203,7 @@ export function TDoASimulation3D() {
 
       {/* Main Workspace split panel */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        
+
         {/* Left Area: 3D Visualization */}
         <div style={{ flex: 1, position: 'relative', height: '100%' }}>
           {/* ThreeJS container */}
@@ -1262,43 +1257,44 @@ export function TDoASimulation3D() {
         {/* Right Area: Control & Stats Panels */}
         <div style={{
           width: '380px',
-          borderLeft: '1px solid var(--border-subtle)',
-          background: 'rgba(6, 9, 15, 0.95)',
+          borderLeft: '1px solid #e2e8f0',
+          background: '#f8fafc',
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
           padding: '20px',
           gap: '20px'
         }}>
-          
+
           {/* PANEL A: Target Geolocation Selector */}
-          <div className="glass-panel" style={{ padding: '16px', background: 'rgba(0,0,0,0.2)' }}>
+          <div className="glass-panel" style={{ padding: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <Wifi size={16} color="var(--accent-cyan)" />
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Wifi size={16} color="#2563eb" />
+              <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
                 RF Transmitter Selection
               </h2>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  SELECT TARGET HOUSE
+                <label style={{ display: 'block', fontSize: '0.7rem', color: '#64748b', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Select Target House
                 </label>
-                <select 
-                  value={selectedHouse.id} 
+                <select
+                  value={selectedHouse.id}
                   onChange={(e) => handleHouseChange(e.target.value)}
                   disabled={isSimulating}
                   style={{
                     width: '100%',
-                    background: '#0c101a',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '8px',
+                    background: '#fff',
+                    border: '1px solid #e2e8f0',
+                    padding: '8px 10px',
                     borderRadius: '6px',
-                    color: '#fff',
+                    color: '#1e293b',
                     fontSize: '0.8rem',
-                    fontFamily: 'var(--font-heading)',
-                    outline: 'none'
+                    fontFamily: 'var(--font-sans)',
+                    outline: 'none',
+                    cursor: 'pointer'
                   }}
                 >
                   {HOUSES.map(h => (
@@ -1308,23 +1304,24 @@ export function TDoASimulation3D() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  ACTIVE WIRELESS NODE (SMARTPHONE)
+                <label style={{ display: 'block', fontSize: '0.7rem', color: '#64748b', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Active Wireless Node (Smartphone)
                 </label>
-                <select 
-                  value={selectedUser} 
+                <select
+                  value={selectedUser}
                   onChange={(e) => setSelectedUser(e.target.value)}
                   disabled={isSimulating}
                   style={{
                     width: '100%',
-                    background: '#0c101a',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '8px',
+                    background: '#fff',
+                    border: '1px solid #e2e8f0',
+                    padding: '8px 10px',
                     borderRadius: '6px',
-                    color: 'var(--accent-cyan)',
+                    color: '#2563eb',
                     fontSize: '0.8rem',
                     fontFamily: 'var(--font-mono)',
-                    outline: 'none'
+                    outline: 'none',
+                    cursor: 'pointer'
                   }}
                 >
                   {selectedHouse.networks.filter(n => n.device === 'smartphone').map(n => (
@@ -1339,12 +1336,12 @@ export function TDoASimulation3D() {
                 style={{
                   width: '100%',
                   marginTop: '12px',
-                  background: isSimulating ? 'rgba(0, 240, 255, 0.05)' : 'linear-gradient(135deg, var(--accent-cyan) 0%, #00a8ff 100%)',
-                  color: isSimulating ? 'var(--accent-cyan)' : '#000',
-                  border: isSimulating ? '1px solid rgba(0, 240, 255, 0.3)' : 'none',
+                  background: isSimulating ? '#f1f5f9' : '#2563eb',
+                  color: isSimulating ? '#94a3b8' : '#fff',
+                  border: isSimulating ? '1px solid #e2e8f0' : 'none',
                   padding: '12px',
                   borderRadius: '6px',
-                  fontFamily: 'var(--font-heading)',
+                  fontFamily: 'var(--font-sans)',
                   fontWeight: 700,
                   fontSize: '0.9rem',
                   cursor: isSimulating ? 'not-allowed' : 'pointer',
@@ -1352,175 +1349,126 @@ export function TDoASimulation3D() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  transition: 'all 0.25s ease'
+                  transition: 'all 0.2s ease'
                 }}
               >
                 {isSimulating ? (
-                  <>
-                    <RefreshCw className="animate-spin" size={16} />
-                    <span>SIMULATING SOLVER...</span>
-                  </>
+                  <><RefreshCw className="animate-spin" size={16} /><span>SIMULATING SOLVER...</span></>
                 ) : (
-                  <>
-                    <Play size={16} fill="#000" />
-                    <span>TRIGGER TDoA SIGNAL</span>
-                  </>
+                  <><Play size={16} fill="#fff" /><span>TRIGGER TDoA SIGNAL</span></>
                 )}
               </button>
             </div>
           </div>
 
-          {/* PANEL B: Solver Stats Readout (The math verification) */}
-          <div className="glass-panel" style={{ padding: '16px', background: 'rgba(0,0,0,0.2)' }}>
+          {/* PANEL B: Solver Stats */}
+          <div className="glass-panel" style={{ padding: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TrendingUp size={16} color="var(--accent-cyan)" />
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <TrendingUp size={16} color="#2563eb" />
+                <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   Numerical Solver Stats
                 </h2>
               </div>
-              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', background: 'rgba(0,240,255,0.08)', color: 'var(--accent-cyan)', padding: '2px 6px', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', background: '#eff6ff', color: '#2563eb', padding: '2px 6px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
                 σ = 10.0ns
               </span>
             </div>
 
             {stats ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>
-                
-                {/* Raw Arrival Times */}
-                <div style={{ background: 'rgba(0,0,0,0.25)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                    🛰️ RAW SIGNAL ARRIVAL TIMES (t_true + jitter)
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>
+                <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginBottom: '6px', fontWeight: 700 }}>🛰️ RAW SIGNAL ARRIVAL TIMES</div>
                   {stats.arrivalTimes.map((t, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
-                      <span style={{ color: 'var(--text-main)' }}>{DEFAULT_DRONES[i].id}:</span>
-                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>
-                        {(t * 1e6).toFixed(4)} μs
-                      </span>
+                      <span style={{ color: 'var(--text-sub)' }}>{DEFAULT_DRONES[i].id}:</span>
+                      <span style={{ color: '#2563eb', fontWeight: 'bold' }}>{(t * 1e6).toFixed(4)} μs</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Pairwise Differences */}
-                <div style={{ background: 'rgba(0,0,0,0.25)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                    ⏱️ PAIRWISE TIME DIFFERENCES (dt)
-                  </div>
+                <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginBottom: '6px', fontWeight: 700 }}>⏱️ PAIRWISE TIME DIFFERENCES</div>
                   {stats.pairwiseDts.map((p, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
-                      <span style={{ color: 'var(--text-main)' }}>{p.pair}:</span>
-                      <span style={{ color: 'var(--accent-amber)', fontWeight: 'bold' }}>
-                        {p.dt > 0 ? '+' : ''}{p.dt.toFixed(2)} ns
-                      </span>
+                      <span style={{ color: 'var(--text-sub)' }}>{p.pair}:</span>
+                      <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{p.dt > 0 ? '+' : ''}{p.dt.toFixed(2)} ns</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Geolocation Coordinate Delta */}
-                <div style={{ background: 'rgba(0,0,0,0.25)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Estimated Pos:</span>
-                    <span style={{ color: '#fff' }}>({stats.estPos[0].toFixed(5)}, {stats.estPos[1].toFixed(5)})</span>
+                    <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>({stats.estPos[0].toFixed(5)}, {stats.estPos[1].toFixed(5)})</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>True Target Pos:</span>
-                    <span style={{ color: '#fff' }}>({stats.truePos[0].toFixed(5)}, {stats.truePos[1].toFixed(5)})</span>
+                    <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>({stats.truePos[0].toFixed(5)}, {stats.truePos[1].toFixed(5)})</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>POSITION ERROR:</span>
-                    <span style={{ color: 'var(--accent-crimson)', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                      {stats.errorMeters.toFixed(2)} meters
-                    </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #e2e8f0' }}>
+                    <span style={{ color: '#2563eb', fontWeight: 700 }}>POSITION ERROR:</span>
+                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem' }}>{stats.errorMeters.toFixed(2)} meters</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.75rem' }}>
+              <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                 <Info size={24} style={{ margin: '0 auto 6px', opacity: 0.3 }} />
                 <span>Awaiting signal trigger to execute least-squares multilateration solver.</span>
               </div>
             )}
           </div>
 
-          {/* PANEL C: Beacon Received Feed (Matching Digital Twin list styling) */}
+          {/* PANEL C: Beacon Feed */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Clock size={16} color="var(--accent-cyan)" />
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Beacon Received Feed
-                </h2>
+                <Clock size={16} color="#2563eb" />
+                <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>Beacon Received Feed</h2>
               </div>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                {beacons.length} Beacons Logged
-              </span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{beacons.length} Beacons Logged</span>
             </div>
 
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-              paddingRight: '2px'
-            }}>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '2px' }}>
               {beacons.length === 0 ? (
-                <div style={{
-                  padding: '24px 12px',
-                  textAlign: 'center',
-                  color: 'var(--text-dim)',
-                  border: '1px dashed var(--border-subtle)',
-                  borderRadius: '6px',
-                  fontSize: '0.75rem'
-                }}>
+                <div style={{ padding: '24px 12px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed #e2e8f0', borderRadius: '6px', fontSize: '0.75rem', background: '#fff' }}>
                   No geotagged beacons logged in this session yet.
                 </div>
               ) : (
                 beacons.map((b) => (
-                  <div
-                    key={b.beacon_id}
-                    style={{
-                      padding: '12px',
-                      background: 'rgba(13, 18, 28, 0.7)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '6px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                      borderLeft: b.confidence === 'high' ? '3px solid var(--accent-emerald)' : '3px solid var(--accent-amber)'
-                    }}
-                  >
+                  <div key={b.beacon_id} style={{
+                    padding: '12px',
+                    background: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    borderLeft: b.confidence === 'high' ? '3px solid #22c55e' : '3px solid #f59e0b'
+                  }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 'bold', fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>
-                        📟 {b.beacon_id}
-                      </span>
-                      <span style={{ 
-                        fontSize: '0.62rem', 
-                        padding: '1px 5px', 
-                        borderRadius: '3px',
-                        fontWeight: 'bold',
-                        background: b.confidence === 'high' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 184, 0, 0.1)',
-                        color: b.confidence === 'high' ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+                      <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>📟 {b.beacon_id}</span>
+                      <span style={{
+                        fontSize: '0.62rem', padding: '1px 6px', borderRadius: '3px', fontWeight: 700,
+                        background: b.confidence === 'high' ? '#f0fdf4' : '#fffbeb',
+                        color: b.confidence === 'high' ? '#22c55e' : '#f59e0b',
+                        border: b.confidence === 'high' ? '1px solid #bbf7d0' : '1px solid #fde68a',
                         textTransform: 'uppercase'
                       }}>
                         {b.confidence} Conf
                       </span>
                     </div>
-
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                      <span>Target Node: <strong style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{b.targetUser}</strong></span>
+                      <span>Node: <strong style={{ color: '#2563eb', fontFamily: 'var(--font-mono)' }}>{b.targetUser}</strong></span>
                       <span>{b.timestamp}</span>
                     </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '2px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '6px' }}>
-                      <MapPin size={11} color="var(--accent-crimson)" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)', fontSize: '0.7rem', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+                      <MapPin size={11} color="#ef4444" />
                       <span>{b.lat.toFixed(5)}°N, {b.lon.toFixed(5)}°E</span>
-                      <span style={{ marginLeft: 'auto', color: 'var(--accent-crimson)', fontWeight: 'bold' }}>
-                        ±{b.estimated_error_meters.toFixed(1)}m
-                      </span>
+                      <span style={{ marginLeft: 'auto', color: '#ef4444', fontWeight: 700 }}>±{b.estimated_error_meters.toFixed(1)}m</span>
                     </div>
                   </div>
                 ))

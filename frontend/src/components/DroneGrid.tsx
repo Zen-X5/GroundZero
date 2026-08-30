@@ -1,5 +1,5 @@
 import React from 'react';
-import { Battery, Navigation, Radio, Cpu, Wifi, Eye } from 'lucide-react';
+import { Battery, Radio, Cpu } from 'lucide-react';
 import { Drone } from '../../lib/types';
 
 interface DroneGridProps {
@@ -16,18 +16,20 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
   });
 
   const staleCount = drones.length - liveDrones.length;
+
   const getBatteryColor = (level: number) => {
-    if (level <= 25) return 'var(--accent-crimson)';
-    if (level <= 50) return 'var(--accent-amber)';
-    return 'var(--accent-emerald)';
+    if (level <= 25) return '#ef4444';
+    if (level <= 50) return '#f59e0b';
+    return '#22c55e';
   };
 
   const getStatusBadge = (status: string) => {
+    const base: React.CSSProperties = { fontSize: '0.68rem', padding: '2px 7px', borderRadius: '4px', fontWeight: 600 };
     switch (status) {
-      case 'SCANNING': return <span className="badge-cyan" style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px' }}>SCANNING</span>;
-      case 'INSPECTING_OPENING': return <span className="badge-high" style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px' }}>INSPECTING VOID</span>;
-      case 'RELAYING': return <span className="badge-stable" style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px' }}>MANET RELAY</span>;
-      default: return <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px' }}>{status}</span>;
+      case 'SCANNING':           return <span style={{ ...base, background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>SCANNING</span>;
+      case 'INSPECTING_OPENING': return <span style={{ ...base, background: '#fffbeb', color: '#f59e0b', border: '1px solid #fde68a' }}>INSPECTING</span>;
+      case 'RELAYING':           return <span style={{ ...base, background: '#f0fdf4', color: '#22c55e', border: '1px solid #bbf7d0' }}>MANET RELAY</span>;
+      default:                   return <span style={{ ...base, background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0' }}>{status}</span>;
     }
   };
 
@@ -37,8 +39,8 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
       {/* Title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Radio size={18} color="var(--accent-cyan)" />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <Radio size={18} color="#2563eb" />
+          <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
             Swarm Telemetry & Aerial Grid
           </h2>
         </div>
@@ -47,22 +49,22 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
             {liveDrones.length} Active
           </span>
           {staleCount > 0 && (
-            <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', padding: '2px 7px', borderRadius: '4px', background: 'rgba(255,100,0,0.12)', color: 'rgba(255,140,0,0.8)', border: '1px solid rgba(255,100,0,0.25)' }}>
-              {staleCount} stale hidden
+            <span style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: '4px', background: '#fffbeb', color: '#f59e0b', border: '1px solid #fde68a' }}>
+              {staleCount} stale
             </span>
           )}
         </div>
       </div>
 
-      {/* Drones List */}
+      {/* Drone cards */}
       <div style={{ overflowY: 'auto', flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
         {liveDrones.length === 0 ? (
-          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-dim)', gridColumn: '1 / -1' }}>
-            <Cpu size={28} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
+          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', gridColumn: '1 / -1' }}>
+            <Cpu size={28} style={{ margin: '0 auto 8px', opacity: 0.35 }} />
             <p style={{ fontSize: '0.85rem' }}>No active swarm telemetry received.</p>
             {staleCount > 0 && (
-              <p style={{ fontSize: '0.75rem', marginTop: '6px', color: 'rgba(255,140,0,0.7)', fontFamily: 'var(--font-mono)' }}>
-                {staleCount} stale record{staleCount > 1 ? 's' : ''} in DB — start the Gazebo simulation to see live drones.
+              <p style={{ fontSize: '0.75rem', marginTop: '6px', color: '#f59e0b' }}>
+                {staleCount} stale record{staleCount > 1 ? 's' : ''} in DB — start Gazebo to see live drones.
               </p>
             )}
           </div>
@@ -72,72 +74,58 @@ export const DroneGrid: React.FC<DroneGridProps> = ({ drones }) => {
               key={drone.callsign || drone._id}
               style={{
                 padding: '14px',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px'
+                gap: '10px',
+                transition: 'box-shadow 0.15s ease',
               }}
+              onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.12)')}
+              onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
             >
-              {/* Header: Callsign & Status */}
+              {/* Callsign & Status */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: drone.meshConnected ? 'var(--accent-emerald)' : 'var(--accent-crimson)' }} />
-                  <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.95rem', color: '#fff' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: drone.meshConnected ? '#22c55e' : '#ef4444', flexShrink: 0 }} />
+                  <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.95rem', color: 'var(--text-main)' }}>
                     {drone.callsign}
                   </strong>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: '3px' }}>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '1px 5px', borderRadius: '3px' }}>
                     {drone.role}
                   </span>
                 </div>
                 {getStatusBadge(drone.status)}
               </div>
 
-              {/* Position & Telemetry */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
-                <div>
-                  <span style={{ color: 'var(--text-dim)' }}>Alt / Z: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.position?.z ?? 8.0).toFixed(1)}m</strong>
-                </div>
-                <div>
-                  <span style={{ color: 'var(--text-dim)' }}>Speed: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.speed ?? 1.8).toFixed(1)} m/s</strong>
-                </div>
-                <div>
-                  <span style={{ color: 'var(--text-dim)' }}>Sector: </span>
-                  <strong style={{ color: 'var(--accent-cyan)' }}>{drone.assignedSector || drone.sector || 'SECTOR_A'}</strong>
-                </div>
-                <div>
-                  <span style={{ color: 'var(--text-dim)' }}>Yaw: </span>
-                  <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{(drone.heading ?? 0).toFixed(0)}°</strong>
-                </div>
+              {/* Telemetry grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem', background: '#fff', border: '1px solid #e2e8f0', padding: '8px 10px', borderRadius: '6px' }}>
+                <div><span style={{ color: 'var(--text-muted)' }}>Alt / Z: </span><strong style={{ color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{(drone.position?.z ?? 8.0).toFixed(1)}m</strong></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Speed: </span><strong style={{ color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{(drone.speed ?? 1.8).toFixed(1)} m/s</strong></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Sector: </span><strong style={{ color: '#2563eb' }}>{drone.assignedSector || drone.sector || 'SECTOR_A'}</strong></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Yaw: </span><strong style={{ color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>{(drone.heading ?? 0).toFixed(0)}°</strong></div>
               </div>
 
               {/* Battery & Sensors */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem' }}>
-                {/* Battery */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Battery size={14} color={getBatteryColor(drone.batteryPercentage ?? 90)} />
                   <span style={{ color: 'var(--text-muted)' }}>Battery:</span>
                   <strong style={{ color: getBatteryColor(drone.batteryPercentage ?? 90), fontFamily: 'var(--font-mono)' }}>
                     {(drone.batteryPercentage ?? 90).toFixed(0)}%
                   </strong>
                 </div>
-
-                {/* Sensor Chips */}
                 <div style={{ display: 'flex', gap: '4px' }}>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,240,255,0.15)', color: 'var(--accent-cyan)' }}>RGB</span>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(255,42,85,0.15)', color: 'var(--accent-crimson)' }}>IR</span>
-                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: 'rgba(0,255,136,0.15)', color: 'var(--accent-emerald)' }}>LiDAR</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>RGB</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca' }}>IR</span>
+                  <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', background: '#f0fdf4', color: '#22c55e', border: '1px solid #bbf7d0' }}>LiDAR</span>
                 </div>
               </div>
-
             </div>
           ))
         )}
       </div>
-
     </div>
   );
 };

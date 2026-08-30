@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, AlertTriangle, Info, AlertCircle, Globe } from 'lucide-react';
+import { Bell, AlertTriangle, Info, AlertCircle, Globe, Activity } from 'lucide-react';
 import { SystemAlert } from '../../lib/types';
 
 interface AlertProps {
@@ -16,33 +16,15 @@ export const AlertFeed: React.FC<AlertProps> = ({ alerts }) => {
       setLoading(true);
       fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson')
         .then(res => res.json())
-        .then(data => {
-          if (data.features) {
-            setExternalAlerts(data.features.slice(0, 20));
-          }
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          setLoading(false);
-        });
+        .then(data => { if (data.features) setExternalAlerts(data.features.slice(0, 20)); setLoading(false); })
+        .catch(() => setLoading(false));
     }
   }, [activeTab, externalAlerts.length]);
 
-  const getAlertIcon = (level: string) => {
-    switch (level) {
-      case 'CRITICAL': return <AlertCircle size={15} color="var(--accent-crimson)" />;
-      case 'WARNING': return <AlertTriangle size={15} color="var(--accent-amber)" />;
-      default: return <Info size={15} color="var(--accent-cyan)" />;
-    }
-  };
-
-  const getAlertBorder = (level: string) => {
-    switch (level) {
-      case 'CRITICAL': return '1px solid rgba(255, 42, 85, 0.35)';
-      case 'WARNING': return '1px solid rgba(255, 184, 0, 0.35)';
-      default: return '1px solid rgba(0, 240, 255, 0.25)';
-    }
+  const getAlertColors = (level: string) => {
+    if (level === 'CRITICAL') return { bg: '#fef2f2', border: '#fecaca', icon: <AlertCircle size={15} color="#ef4444" />, titleColor: '#b91c1c' };
+    if (level === 'WARNING')  return { bg: '#fffbeb', border: '#fde68a', icon: <AlertTriangle size={15} color="#f59e0b" />, titleColor: '#92400e' };
+    return { bg: '#eff6ff', border: '#bfdbfe', icon: <Info size={15} color="#2563eb" />, titleColor: '#1e40af' };
   };
 
   return (
@@ -51,74 +33,72 @@ export const AlertFeed: React.FC<AlertProps> = ({ alerts }) => {
       {/* Title & Tabs */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Bell size={18} color="var(--accent-cyan)" />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <Bell size={18} color="#2563eb" />
+          <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
             Live Event Feed
           </h2>
         </div>
-        
-        <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px' }}>
-          <button 
+
+        {/* Tab toggle */}
+        <div style={{ display: 'flex', gap: '3px', background: '#f1f5f9', padding: '3px', borderRadius: '7px', border: '1px solid #e2e8f0' }}>
+          <button
             onClick={() => setActiveTab('SENSOR')}
-            style={{ 
-              background: activeTab === 'SENSOR' ? 'var(--accent-cyan)' : 'transparent',
-              color: activeTab === 'SENSOR' ? '#000' : 'var(--text-muted)',
-              border: 'none', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 600
+            style={{
+              background: activeTab === 'SENSOR' ? '#fff' : 'transparent',
+              color: activeTab === 'SENSOR' ? '#2563eb' : '#64748b',
+              border: activeTab === 'SENSOR' ? '1px solid #e2e8f0' : '1px solid transparent',
+              padding: '4px 12px', fontSize: '0.75rem', borderRadius: '5px', cursor: 'pointer', fontWeight: 600,
+              boxShadow: activeTab === 'SENSOR' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
             }}>
             Sensor Report
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('DISASTER')}
-            style={{ 
-              background: activeTab === 'DISASTER' ? 'var(--accent-amber)' : 'transparent',
-              color: activeTab === 'DISASTER' ? '#000' : 'var(--text-muted)',
-              border: 'none', padding: '4px 10px', fontSize: '0.75rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 600
+            style={{
+              background: activeTab === 'DISASTER' ? '#fff' : 'transparent',
+              color: activeTab === 'DISASTER' ? '#f59e0b' : '#64748b',
+              border: activeTab === 'DISASTER' ? '1px solid #e2e8f0' : '1px solid transparent',
+              padding: '4px 12px', fontSize: '0.75rem', borderRadius: '5px', cursor: 'pointer', fontWeight: 600,
+              boxShadow: activeTab === 'DISASTER' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
             }}>
             Disaster Alerts
           </button>
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* Content */}
       <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        
+
         {/* SENSOR TAB */}
         {activeTab === 'SENSOR' && (
           alerts.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '20px', fontSize: '0.8rem' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '32px', fontSize: '0.8rem' }}>
+              <Activity size={28} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
               All systems normal. Monitoring incoming sensor feeds.
             </div>
           ) : (
-            alerts.map((a) => (
-              <div
-                key={a.id}
-                style={{
-                  padding: '10px 12px',
-                  background: 'rgba(0,0,0,0.3)',
-                  border: getAlertBorder(a.level),
-                  borderRadius: '6px',
-                  display: 'flex',
-                  gap: '10px',
-                  alignItems: 'flex-start'
-                }}
-              >
-                <div style={{ marginTop: '2px' }}>{getAlertIcon(a.level)}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                    <strong style={{ fontSize: '0.8rem', color: '#fff' }}>{a.title}</strong>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{a.timestamp}</span>
+            alerts.map((a) => {
+              const c = getAlertColors(a.level);
+              return (
+                <div key={a.id} style={{ padding: '10px 12px', background: c.bg, border: `1px solid ${c.border}`, borderRadius: '8px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <div style={{ marginTop: '2px', flexShrink: 0 }}>{c.icon}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <strong style={{ fontSize: '0.8rem', color: c.titleColor }}>{a.title}</strong>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{a.timestamp}</span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{a.message}</p>
                   </div>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>{a.message}</p>
                 </div>
-              </div>
-            ))
+              );
+            })
           )
         )}
 
-        {/* DISASTER ALERTS TAB (USGS) */}
+        {/* DISASTER (USGS) TAB */}
         {activeTab === 'DISASTER' && (
           loading ? (
-             <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '20px', fontSize: '0.8rem' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '32px', fontSize: '0.8rem' }}>
               Fetching global disaster telemetry...
             </div>
           ) : (
@@ -127,38 +107,27 @@ export const AlertFeed: React.FC<AlertProps> = ({ alerts }) => {
               const place = feature.properties.place;
               const time = new Date(feature.properties.time).toLocaleTimeString();
               const isSevere = mag >= 5.0;
-              
+              const bg     = isSevere ? '#fef2f2' : '#fffbeb';
+              const border = isSevere ? '#fecaca' : '#fde68a';
+              const color  = isSevere ? '#ef4444' : '#f59e0b';
               return (
-                <div
-                  key={feature.id || idx}
-                  style={{
-                    padding: '10px 12px',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: isSevere ? '1px solid rgba(255, 42, 85, 0.35)' : '1px solid rgba(255, 184, 0, 0.35)',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    gap: '10px',
-                    alignItems: 'flex-start'
-                  }}
-                >
-                  <div style={{ marginTop: '2px' }}>
-                     <Globe size={15} color={isSevere ? "var(--accent-crimson)" : "var(--accent-amber)"} />
+                <div key={feature.id || idx} style={{ padding: '10px 12px', background: bg, border: `1px solid ${border}`, borderRadius: '8px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <div style={{ marginTop: '2px', flexShrink: 0 }}>
+                    <Globe size={15} color={color} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                      <strong style={{ fontSize: '0.8rem', color: '#fff' }}>M {mag.toFixed(1)} Earthquake</strong>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{time}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <strong style={{ fontSize: '0.8rem', color: isSevere ? '#b91c1c' : '#92400e' }}>M {mag.toFixed(1)} Earthquake</strong>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{time}</span>
                     </div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>{place}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{place}</p>
                   </div>
                 </div>
               );
             })
           )
         )}
-
       </div>
-
     </div>
   );
 };

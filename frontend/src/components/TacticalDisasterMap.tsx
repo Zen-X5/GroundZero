@@ -281,14 +281,14 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
             ))}
           </div>
           {/* 2D / 3D View Toggle */}
-          <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: '6px', overflow: 'hidden', background: 'rgba(4,6,12,0.9)' }}>
+          <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden', background: '#f1f5f9' }}>
             {(['2D', '3D'] as const).map(mode => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 style={{
-                  background: viewMode === mode ? 'var(--accent-cyan)' : 'transparent',
-                  color: viewMode === mode ? '#000' : 'var(--text-muted)',
+                  background: viewMode === mode ? '#2563eb' : 'transparent',
+                  color: viewMode === mode ? '#fff' : '#64748b',
                   border: 'none', padding: '6px 14px',
                   fontSize: '0.72rem', fontWeight: 'bold', cursor: 'pointer',
                   transition: 'all 0.2s', fontFamily: 'var(--font-mono)',
@@ -296,10 +296,10 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
               >{mode}</button>
             ))}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 14px', borderRadius: '6px', border: '1px solid', borderColor: hasLiveDrones ? 'var(--accent-emerald)' : 'rgba(0,240,255,0.28)', background: hasLiveDrones ? 'rgba(16,185,129,0.08)' : 'rgba(0,240,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 14px', borderRadius: '6px', border: '1px solid', borderColor: hasLiveDrones ? '#bbf7d0' : '#bfdbfe', background: hasLiveDrones ? '#f0fdf4' : '#eff6ff' }}>
             {hasLiveDrones
-              ? <><Radio size={13} color="var(--accent-emerald)" /><span style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--accent-emerald)', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)', marginLeft: '6px' }}>LIVE SCANNING</span></>
-              : <><Activity size={13} color="var(--accent-cyan)" /><span style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--accent-cyan)', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)', marginLeft: '6px' }}>SIMULATING</span></>
+              ? <><Radio size={13} color="#22c55e" /><span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#22c55e', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)', marginLeft: '6px' }}>LIVE SCANNING</span></>
+              : <><Activity size={13} color="#2563eb" /><span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#2563eb', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)', marginLeft: '6px' }}>SIMULATING</span></>
             }
           </div>
         </div>
