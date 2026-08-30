@@ -44,6 +44,7 @@ export class DronesService {
   async upsertTelemetry(dto: CreateDroneDto): Promise<Drone> {
     const payload = {
       ...dto,
+      callsign: dto.callsign.toLowerCase(),
       lastHeartbeatAt: new Date(),
     };
 
@@ -91,4 +92,29 @@ export class DronesService {
       return updated;
     }
   }
+
+  async purgeStale(): Promise<{ deletedCount: number }> {
+    const HEARTBEAT_TTL_MS = 8000;
+    const cutoff = new Date(Date.now() - HEARTBEAT_TTL_MS);
+
+    for (const [callsign, drone] of this.memoryDrones.entries()) {
+      if (!drone.lastHeartbeatAt || new Date(drone.lastHeartbeatAt).getTime() < cutoff.getTime()) {
+        this.memoryDrones.delete(callsign);
+      }
+    }
+
+    try {
+      const result = await this.droneModel.deleteMany({
+        $or: [
+          { lastHeartbeatAt: { $lt: cutoff } },
+          { lastHeartbeatAt: { $exists: false } }
+        ]
+      }).exec();
+      return { deletedCount: result.deletedCount };
+    } catch (e) {
+      this.logger.warn(`Failed to purge stale drones from MongoDB: ${e.message}`);
+      return { deletedCount: 0 };
+    }
+  }
 }
+

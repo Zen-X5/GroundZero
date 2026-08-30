@@ -24,7 +24,26 @@ from sensor_msgs.msg import Image
 from nav_msgs.msg import Odometry
 from cv_bridge import CvBridge
 
-BACKEND_URL = "http://localhost:3000"
+import os
+
+BACKEND_URL = os.environ.get("BACKEND_URL")
+if not BACKEND_URL:
+    try:
+        if os.path.exists('/etc/resolv.conf'):
+            with open('/etc/resolv.conf', 'r') as f:
+                for line in f:
+                    if line.strip().startswith('nameserver'):
+                        ns_ip = line.split()[1].strip()
+                        BACKEND_URL = f"http://{ns_ip}:3000"
+                        break
+    except Exception:
+        pass
+
+if not BACKEND_URL:
+    BACKEND_URL = "http://localhost:3000"
+
+print(f"[*] Ground-Zero AI Perception using BACKEND_URL: {BACKEND_URL}")
+
 STREAM_PORT = 8000
 
 # Global thread-safe frame buffer for MJPEG Web streaming
@@ -349,7 +368,7 @@ class MultiSpectralPerceptionNode(Node):
         
         if active_data['rgb'] is None or active_data['thermal'] is None:
             splash = np.zeros((480, 960, 3), dtype=np.uint8)
-            cv2.putText(splash, f"CONNECTING TO {current_d.upper()} SENSORS...", (220, 240),
+            cv2.putText(splash, f"CONNECTING TO {current_d.lower()} SENSORS...", (220, 240),
                         cv2.FONT_HERSHEY_DUPLEX, 0.8, (0, 240, 255), 2)
             _, encoded = cv2.imencode('.jpg', splash, [cv2.IMWRITE_JPEG_QUALITY, 80])
             with lock:
@@ -412,7 +431,7 @@ class MultiSpectralPerceptionNode(Node):
         sector_name = active_data['sector']
         cv2.rectangle(hud_canvas, (0, 0), (img_w*2, 45), (10, 14, 22), -1)
         
-        cv2.putText(hud_canvas, f"AERIAL FEED: [{current_d.upper()}] - {sector_name}", (20, 30),
+        cv2.putText(hud_canvas, f"AERIAL FEED: [{current_d.lower()}] - {sector_name}", (20, 30),
                     cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 240, 255), 2)
         cv2.putText(hud_canvas, "FLIR INFERNO RADIOMETRIC LWIR (37C BODY HEAT)", (img_w + 20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 136), 1)
@@ -462,7 +481,7 @@ class MultiSpectralPerceptionNode(Node):
                     "accessibilityScore": 65.0,
                     "urgencyMultiplier": 1.3,
                     "reasoning": [
-                        f"Multi-spectral 37°C body heat verified by {current_d.upper()}",
+                        f"Multi-spectral 37°C body heat verified by {current_d.lower()}",
                         f"Target located at ({coords['x']}m, {coords['y']}m, {coords['z']}m) in {sector_name}",
                         f"Posture analyzed as {best['posture']}",
                         "Surrounding flood water depth estimated at 1.0m"
@@ -470,13 +489,13 @@ class MultiSpectralPerceptionNode(Node):
                 },
                 "status": "RESCUE_QUEUED",
                 "estimatedGroupSize": 1,
-                "confirmingDrones": [current_d.upper()]
+                "confirmingDrones": [current_d.lower()]
             }
 
             # Verify connectivity to Ground Base Station
             is_connected = True
             try:
-                c_res = requests.get(f"{BACKEND_URL}/network/connectivity/{current_d.upper()}", timeout=0.3)
+                c_res = requests.get(f"{BACKEND_URL}/network/connectivity/{current_d.lower()}", timeout=0.3)
                 is_connected = c_res.json().get("isConnected", True)
             except Exception:
                 pass
@@ -484,7 +503,7 @@ class MultiSpectralPerceptionNode(Node):
             if not is_connected:
                 # Isolated node: cache detection on the edge
                 self.edge_cache.append(payload)
-                self.get_logger().warn(f" [EDGE CACHE] Isolated link detected for {current_d.upper()}! Cached {surv_code} locally on edge. Queue size: {len(self.edge_cache)}")
+                self.get_logger().warn(f" [EDGE CACHE] Isolated link detected for {current_d.lower()}! Cached {surv_code} locally on edge. Queue size: {len(self.edge_cache)}")
             else:
                 # Connected: Flush edge cache buffer first
                 if self.edge_cache:
@@ -512,7 +531,7 @@ class MultiSpectralPerceptionNode(Node):
                 d_pos = d_odom if d_odom is not None else type('pos', (), {'x': 10.0 if '1' in d_name else (80.0 if '2' in d_name else 140.0), 'y': 50.0, 'z': 8.0})()
                 
                 telemetry_payload = {
-                    "callsign": d_name.upper(),
+                    "callsign": d_name.lower(),
                     "status": "SCANNING",
                     "assignedSector": self.drones[d_name]['sector'],
                     "sector": self.drones[d_name]['sector'],
