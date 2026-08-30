@@ -134,8 +134,8 @@
   - [ ] `[ ]` Compute probabilistic survivor likelihood based on venting heat, motion near openings, and structural damage (strictly adhering to scientific rules).
 
 - **Rashel (Frontend & Digital Twin):**
-  - [ ] `[ ]` Build 3D / Isometric Building Inspection UI card.
-  - [ ] `[ ]` Display inspection completion status, angles surveyed, and estimated survivor probability.
+  - [x] `[x]` Build 3D / Isometric Building Inspection UI card.
+  - [x] `[x]` Display inspection completion status, angles surveyed, and estimated survivor probability.
 
 ---
 

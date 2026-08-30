@@ -466,6 +466,32 @@ export const BuildingInspection3DCard: React.FC<Building3DProps> = ({ building }
           </div>
         </div>
 
+        {/* Angles Surveyed Panel */}
+        <div style={{ padding: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-subtle)', borderRadius: '6px', gridColumn: 'span 2' }}>
+          <span style={{ fontSize: '0.63rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+            Angles Surveyed (Perimeter Inspection)
+          </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <span className="badge-cyan" style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)', opacity: status === 'UNINSPECTED' ? 0.3 : 1 }}>
+                0° (N)
+              </span>
+              <span className="badge-cyan" style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)', opacity: status === 'UNINSPECTED' ? 0.3 : 1 }}>
+                90° (E)
+              </span>
+              <span className="badge-cyan" style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)', opacity: status !== 'COMPLETED' ? 0.3 : 1 }}>
+                180° (S) {status !== 'COMPLETED' && '• PENDING'}
+              </span>
+              <span className="badge-cyan" style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)', opacity: status !== 'COMPLETED' ? 0.3 : 1 }}>
+                270° (W) {status !== 'COMPLETED' && '• PENDING'}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              {status === 'COMPLETED' ? '360° ORBIT COMPLETE' : status === 'IN_PROGRESS' ? '180° SCANNED' : '0° SCANNED'}
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* Structural Integrity details */}
