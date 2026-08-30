@@ -8,6 +8,7 @@ import { SurvivorDetailModal } from './components/SurvivorDetailModal';
 import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
 import { TDoASimulation3D } from './components/TDoASimulation3D';
+import CommandAgent from './components/CommandAgent';
 import { getSocket } from '../lib/services/socket';
 import {
   useGetDronesQuery,
@@ -16,16 +17,16 @@ import {
   useGetBuildingsQuery,
 } from '../lib/store/apiSlice';
 import { Survivor, SystemAlert } from '../lib/types';
-import { 
-  Map, 
-  Camera, 
-  Radio, 
-  Building2, 
-  Users, 
-  Wifi, 
-  Bell, 
-  Activity, 
-  ShieldCheck 
+import {
+  Map,
+  Camera,
+  Radio,
+  Building2,
+  Users,
+  Wifi,
+  Bell,
+  Activity,
+  ShieldCheck
 } from 'lucide-react';
 
 export function App() {
@@ -123,7 +124,7 @@ export function App() {
         </div>
 
         <nav className="saas-nav-list">
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'MAP' ? 'active' : ''}`}
             onClick={() => setActiveTab('MAP')}
           >
@@ -131,7 +132,7 @@ export function App() {
             <span>Tactical Map</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'HUD' ? 'active' : ''}`}
             onClick={() => setActiveTab('HUD')}
           >
@@ -139,7 +140,7 @@ export function App() {
             <span>Multi-Spectral HUD</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'FLEET' ? 'active' : ''}`}
             onClick={() => setActiveTab('FLEET')}
           >
@@ -149,7 +150,7 @@ export function App() {
 
 
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'QUEUE' ? 'active' : ''}`}
             onClick={() => setActiveTab('QUEUE')}
           >
@@ -157,7 +158,7 @@ export function App() {
             <span>Rescue Queue ({survivors.length})</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'MANET' ? 'active' : ''}`}
             onClick={() => setActiveTab('MANET')}
           >
@@ -165,7 +166,7 @@ export function App() {
             <span>MANET Topology</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'ALERTS' ? 'active' : ''}`}
             onClick={() => setActiveTab('ALERTS')}
           >
@@ -173,7 +174,7 @@ export function App() {
             <span>Disaster Feed ({alerts.length})</span>
           </div>
 
-          <div 
+          <div
             className={`saas-nav-item ${activeTab === 'TDOA' ? 'active' : ''}`}
             onClick={() => setActiveTab('TDOA')}
           >
@@ -269,6 +270,7 @@ export function App() {
         survivor={selectedSurvivor}
         onClose={() => setSelectedSurvivor(null)}
       />
+      <CommandAgent />
     </div>
   );
 }
