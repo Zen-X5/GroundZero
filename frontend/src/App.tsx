@@ -7,6 +7,7 @@ import { AlertFeed } from './components/AlertFeed';
 import { SurvivorDetailModal } from './components/SurvivorDetailModal';
 import { TacticalDisasterMap } from './components/TacticalDisasterMap';
 import { MultiSpectralHUD } from './components/MultiSpectralHUD';
+import { MacroSatelliteMap } from './components/MacroSatelliteMap';
 import CommandAgent from './components/CommandAgent';
 import { getSocket } from '../lib/services/socket';
 import {
@@ -25,13 +26,14 @@ import {
   Wifi, 
   Bell, 
   Activity, 
-  ShieldCheck 
+  ShieldCheck,
+  Satellite
 } from 'lucide-react';
 
 export function App() {
   const [connected, setConnected] = useState(false);
   const [selectedSurvivor, setSelectedSurvivor] = useState<Survivor | null>(null);
-  const [activeTab, setActiveTab] = useState<'MAP' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS'>('MAP');
+  const [activeTab, setActiveTab] = useState<'MAP' | 'SATELLITE' | 'HUD' | 'FLEET' | 'BUILDINGS' | 'QUEUE' | 'MANET' | 'ALERTS'>('MAP');
   const [activeDrone, setActiveDrone] = useState<string>('drone_2');
 
   // RTK Query Hooks with Automated Tag Caching & WebSocket Streaming
@@ -132,6 +134,14 @@ export function App() {
           </div>
 
           <div 
+            className={`saas-nav-item ${activeTab === 'SATELLITE' ? 'active' : ''}`}
+            onClick={() => setActiveTab('SATELLITE')}
+          >
+            <Satellite size={18} className="nav-icon" />
+            <span>Satellite Intel</span>
+          </div>
+
+          <div 
             className={`saas-nav-item ${activeTab === 'HUD' ? 'active' : ''}`}
             onClick={() => setActiveTab('HUD')}
           >
@@ -197,6 +207,12 @@ export function App() {
                 buildings={buildings}
                 onSelectSurvivor={(s) => setSelectedSurvivor(s)}
               />
+            </div>
+          )}
+
+          {activeTab === 'SATELLITE' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', padding: '20px' }}>
+              <MacroSatelliteMap />
             </div>
           )}
 
