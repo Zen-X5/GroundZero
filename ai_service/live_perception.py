@@ -427,7 +427,8 @@ class MultiSpectralPerceptionNode(Node):
         detected_survivors = []
         for cnt in contours:
             area = cv2.contourArea(cnt)
-            if 80 < area < 25000:
+            # Limit max area to 1500 to ignore large bright textures (roads/water)
+            if 80 < area < 1500:
                 x, y, w, h = cv2.boundingRect(cnt)
                 aspect_ratio = h / float(w)
                 
