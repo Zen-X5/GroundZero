@@ -199,6 +199,7 @@ export function App() {
                 drones={drones}
                 survivors={survivors}
                 topology={topology}
+                buildings={buildings}
                 onSelectSurvivor={(s) => setSelectedSurvivor(s)}
               />
             </div>
