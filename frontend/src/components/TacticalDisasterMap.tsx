@@ -1,16 +1,18 @@
 import React from 'react';
 import { Compass, ShieldAlert, Radio, User, Flame } from 'lucide-react';
-import { Drone, Survivor } from '../../lib/types';
+import { Drone, Survivor, NetworkTopology } from '../../lib/types';
 
 interface TacticalDisasterMapProps {
   drones: Drone[];
   survivors: Survivor[];
+  topology: NetworkTopology | null;
   onSelectSurvivor: (survivor: Survivor) => void;
 }
 
 export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
   drones,
   survivors,
+  topology,
   onSelectSurvivor,
 }) => {
   // Map dimensions: World is 200m (X) x 100m (Y)
@@ -144,31 +146,137 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
             SECTOR C: URBAN COLLAPSE
           </text>
 
+          {/* Ground Base Station (0, 50) */}
+          <g>
+            <circle cx="10" cy="250" r="14" fill="rgba(16, 185, 129, 0.15)" stroke="var(--accent-emerald)" strokeWidth="1" />
+            <circle cx="10" cy="250" r="5" fill="var(--accent-emerald)" />
+            <text x="24" y="253" fill="var(--accent-emerald)" fontSize="8" fontFamily="monospace" fontWeight="bold">BASE_STATION</text>
+          </g>
+
           {/* ================= MANET MESH LINKS ================= */}
-          {drones.length >= 2 && (
-            <g opacity="0.8">
-              {drones.map((d, i) => {
-                if (i === drones.length - 1) return null;
-                const next = drones[i + 1];
-                const x1 = toSvgX(d.position?.x ?? 0) * 10;
-                const y1 = toSvgY(d.position?.y ?? 0) * 5;
-                const x2 = toSvgX(next.position?.x ?? 0) * 10;
-                const y2 = toSvgY(next.position?.y ?? 0) * 5;
-                return (
+          {(() => {
+            if (topology && topology.links && topology.links.length > 0) {
+              const renderedLinks: React.ReactNode[] = [];
+
+              // 1. Draw direct link from Gateway Drone to Ground Station Base
+              if (topology.gatewayDrone) {
+                const gatewayCallsign = typeof topology.gatewayDrone === 'string' 
+                  ? topology.gatewayDrone 
+                  : topology.gatewayDrone.callsign;
+                const gateway = drones.find(d => d.callsign.toLowerCase() === gatewayCallsign?.toLowerCase());
+                if (gateway) {
+                  const gx = toSvgX(gateway.position?.x ?? 0) * 10;
+                  const gy = toSvgY(gateway.position?.y ?? 0) * 5;
+                  renderedLinks.push(
+                    <line
+                      key="link-gateway-base"
+                      x1={gx}
+                      y1={gy}
+                      x2={10}
+                      y2={250}
+                      className="manet-link"
+                      stroke="var(--accent-emerald)"
+                      strokeWidth="3.5"
+                    />
+                  );
+                }
+              }
+
+              // 2. Draw links between drones
+              topology.links.forEach((link, idx) => {
+                const srcCallsign = typeof link.sourceDrone === 'string' ? link.sourceDrone : link.sourceDrone?.callsign;
+                const trgCallsign = typeof link.targetDrone === 'string' ? link.targetDrone : link.targetDrone?.callsign;
+                const srcId = typeof link.sourceDrone === 'string' ? link.sourceDrone : link.sourceDrone?._id;
+                const trgId = typeof link.targetDrone === 'string' ? link.targetDrone : link.targetDrone?._id;
+
+                const srcDrone = drones.find(d => d._id === srcId || d.callsign.toLowerCase() === srcCallsign?.toLowerCase());
+                const trgDrone = drones.find(d => d._id === trgId || d.callsign.toLowerCase() === trgCallsign?.toLowerCase());
+
+                if (!srcDrone || !trgDrone) return;
+
+                const x1 = toSvgX(srcDrone.position?.x ?? 0) * 10;
+                const y1 = toSvgY(srcDrone.position?.y ?? 0) * 5;
+                const x2 = toSvgX(trgDrone.position?.x ?? 0) * 10;
+                const y2 = toSvgY(trgDrone.position?.y ?? 0) * 5;
+
+                const isRoute = link.isActiveRoutingPath ?? false;
+                const color = link.linkStatus === 'CONNECTED' ? 'var(--accent-emerald)' : (link.linkStatus === 'DEGRADED' ? 'var(--accent-amber)' : 'rgba(255,255,255,0.15)');
+
+                renderedLinks.push(
                   <line
-                    key={`link-${i}`}
+                    key={`link-${idx}`}
                     x1={x1}
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    className="manet-link"
-                    stroke="var(--accent-emerald)"
-                    strokeWidth="2"
+                    className={isRoute ? "manet-link" : undefined}
+                    stroke={color}
+                    strokeWidth={isRoute ? "2.5" : "1.0"}
+                    strokeDasharray={!isRoute ? "4, 4" : undefined}
+                    opacity={isRoute ? "0.9" : "0.4"}
                   />
                 );
-              })}
-            </g>
-          )}
+              });
+
+              return renderedLinks;
+            } else {
+              // Fallback proximity check (64.0m) if topology is null
+              const COMMS_RANGE = 64.0;
+              const renderedLinks: React.ReactNode[] = [];
+
+              for (let i = 0; i < drones.length; i++) {
+                const d1 = drones[i];
+                const x1 = toSvgX(d1.position?.x ?? 0) * 10;
+                const y1 = toSvgY(d1.position?.y ?? 0) * 5;
+
+                // Ground Station proximity link
+                const distToBase = Math.sqrt(Math.pow(d1.position?.x ?? 0, 2) + Math.pow((d1.position?.y ?? 50) - 50.0, 2));
+                if (distToBase <= COMMS_RANGE) {
+                  renderedLinks.push(
+                    <line
+                      key={`link-fallback-base-${i}`}
+                      x1={x1}
+                      y1={y1}
+                      x2={10}
+                      y2={250}
+                      className="manet-link"
+                      stroke="var(--accent-emerald)"
+                      strokeWidth="2.5"
+                    />
+                  );
+                }
+
+                for (let j = i + 1; j < drones.length; j++) {
+                  const d2 = drones[j];
+                  const x2 = toSvgX(d2.position?.x ?? 0) * 10;
+                  const y2 = toSvgY(d2.position?.y ?? 0) * 5;
+
+                  const dist = Math.sqrt(
+                    Math.pow((d1.position?.x ?? 0) - (d2.position?.x ?? 0), 2) +
+                    Math.pow((d1.position?.y ?? 0) - (d2.position?.y ?? 0), 2)
+                  );
+
+                  if (dist <= COMMS_RANGE) {
+                    renderedLinks.push(
+                      <line
+                        key={`link-fallback-${i}-${j}`}
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        className="manet-link"
+                        stroke="var(--accent-emerald)"
+                        strokeWidth="1.5"
+                        strokeDasharray="4, 4"
+                      />
+                    );
+                  }
+                }
+              }
+
+              return renderedLinks;
+            }
+          })()}
 
           {/* ================= SURVIVOR BEACONS ================= */}
           {survivors.map((s) => {
@@ -212,8 +320,27 @@ export const TacticalDisasterMap: React.FC<TacticalDisasterMapProps> = ({
 
             return (
               <g key={d.callsign || d._id}>
-                {/* Coverage Bubble */}
-                <circle cx={dx} cy={dy} r="45" fill="rgba(0, 240, 255, 0.06)" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="1" strokeDasharray="3 3" />
+                {/* Dynamic Emergency Wi-Fi Hotspot Coverage Bubble */}
+                {d.meshConnected ? (
+                  <>
+                    <circle cx={dx} cy={dy} r="45" fill="rgba(16, 185, 129, 0.04)" stroke="rgba(16, 185, 129, 0.3)" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Pulsing Wi-Fi wave */}
+                    <circle cx={dx} cy={dy} r="45" fill="none" stroke="rgba(16, 185, 129, 0.3)" strokeWidth="1">
+                      <animate attributeName="r" from="40" to="52" dur="2.5s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="0.5" to="0" dur="2.5s" repeatCount="indefinite" />
+                    </circle>
+                    <text x={dx} y={dy - 12} fill="var(--accent-emerald)" fontSize="6" fontFamily="monospace" textAnchor="middle" fontWeight="bold" letterSpacing="0.05em">
+                      WI-FI ACTIVE
+                    </text>
+                  </>
+                ) : (
+                  <>
+                    <circle cx={dx} cy={dy} r="45" fill="rgba(245, 158, 11, 0.03)" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
+                    <text x={dx} y={dy - 12} fill="var(--accent-amber)" fontSize="6" fontFamily="monospace" textAnchor="middle" fontWeight="bold" letterSpacing="0.05em">
+                      LOCAL ONLY
+                    </text>
+                  </>
+                )}
 
                 {/* Drone Center Icon */}
                 <circle cx={dx} cy={dy} r="9" fill="var(--accent-cyan)" filter="url(#glow-cyan)" />
