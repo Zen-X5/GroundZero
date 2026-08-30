@@ -93,7 +93,7 @@ def generate_launch_description():
             '-world', 'disaster_night_world',
             '-file', configure_drone_sdf('drone_3'),
             '-name', 'drone_3',
-            '-x', '140.0', '-y', '50.0', '-z', '12.0'
+            '-x', '140.0', '-y', '50.0', '-z', '16.0'
         ],
         output='screen'
     )
