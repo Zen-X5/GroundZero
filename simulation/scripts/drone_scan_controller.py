@@ -454,7 +454,10 @@ class DroneScanController(Node):
             cmd_vel.linear.x = self.Kp_linear * local_dx
             cmd_vel.linear.y = self.Kp_linear * local_dy
             cmd_vel.linear.z = self.Kp_linear * dz
-            cmd_vel.angular.z = self.Kp_angular * yaw_error
+            
+            # Clamp angular yaw velocity to prevent high-frequency spinning oscillations
+            raw_yaw_speed = self.Kp_angular * yaw_error
+            cmd_vel.angular.z = max(-1.5, min(1.5, raw_yaw_speed))
             
             # Constrain speed to limits
             linear_speed = math.sqrt(cmd_vel.linear.x**2 + cmd_vel.linear.y**2 + cmd_vel.linear.z**2)

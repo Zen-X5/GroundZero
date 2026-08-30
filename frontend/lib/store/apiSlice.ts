@@ -127,6 +127,21 @@ export const groundZeroApi = createApi({
             { type: 'Buildings', id: 'LIST' },
           ]
           : [{ type: 'Buildings', id: 'LIST' }],
+      async onCacheEntryAdded(
+        _arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const socket = getSocket();
+        try {
+          await cacheDataLoaded;
+          socket.on('state:initial', (data) => {
+            if (data?.buildings) {
+              updateCachedData(() => data.buildings);
+            }
+          });
+        } catch { }
+        await cacheEntryRemoved;
+      },
     }),
 
     // 5. Upsert Survivor Detection Mutation (Invalidates Survivor Tag Cache)

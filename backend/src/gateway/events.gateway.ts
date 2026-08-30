@@ -6,11 +6,12 @@ import {
   OnGatewayDisconnect,
   MessageBody,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { DronesService } from '../drones/drones.service';
 import { SurvivorsService } from '../survivors/survivors.service';
 import { NetworkService } from '../network/network.service';
+import { BuildingsService } from '../buildings/buildings.service';
 
 let globalGatewayInstance: EventsGateway | null = null;
 
@@ -23,18 +24,50 @@ export function getGlobalEventsGateway(): EventsGateway | null {
     origin: '*',
   },
 })
-export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit, OnModuleDestroy {
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(EventsGateway.name);
+  private broadcastInterval: NodeJS.Timeout | null = null;
 
   constructor(
     private readonly dronesService: DronesService,
     private readonly survivorsService: SurvivorsService,
     private readonly networkService: NetworkService,
+    private readonly buildingsService: BuildingsService,
   ) {
     globalGatewayInstance = this;
+  }
+
+  onModuleInit() {
+    this.logger.log('Starting 10 Hz ground-zero unified state broadcaster...');
+    this.broadcastInterval = setInterval(async () => {
+      try {
+        if (!this.server) return;
+        const drones = await this.dronesService.findAll();
+        const topology = await this.networkService.getLatestTopology();
+        const survivors = await this.survivorsService.findAll();
+        const buildings = await this.buildingsService.findAll();
+
+        this.server.emit('state:initial', {
+          drones,
+          survivors,
+          topology,
+          buildings,
+          timestamp: Date.now(),
+        });
+      } catch (err) {
+        this.logger.warn(`Unified state broadcast warning: ${err.message}`);
+      }
+    }, 100);
+  }
+
+  onModuleDestroy() {
+    if (this.broadcastInterval) {
+      clearInterval(this.broadcastInterval);
+      this.broadcastInterval = null;
+    }
   }
 
   handleConnection(client: Socket) {
