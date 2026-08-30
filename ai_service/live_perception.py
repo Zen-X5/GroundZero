@@ -146,6 +146,37 @@ class MultiSpectralPerceptionNode(Node):
         self.known_survivors = set()
         self.edge_cache = [] # local cache queue for isolated links
 
+        # Phase 5 Building Configurations & Inspection status
+        self.buildings = {
+            'urban_building_1_apartments': {
+                'position': {'x': 155.0, 'y': 32.0, 'z': 5.0},
+                'heightMeters': 10.0,
+                'floors': 3,
+                'structuralDamage': 'MODERATE',
+                'inspectionStatus': 'UNINSPECTED',
+                'accessibleOpenings': [
+                    {'openingId': 'window_fl2_south', 'floorLevel': 2, 'dimensionsMeters': [6.0, 1.4], 'isObstructed': False, 'detectedOccupants': 0, 'openingType': 'WINDOW', 'inspectionConfidence': 0.0, 'position': {'x': 155.0, 'y': 28.5, 'z': 7.5}},
+                    {'openingId': 'window_fl1_south', 'floorLevel': 1, 'dimensionsMeters': [6.0, 1.4], 'isObstructed': True, 'detectedOccupants': 0, 'openingType': 'WINDOW', 'inspectionConfidence': 0.0, 'position': {'x': 155.0, 'y': 28.5, 'z': 4.5}}
+                ],
+                'inspectionDrones': [],
+                'surveyedAngles': [],
+                'last_push_time': 0.0
+            },
+            'urban_building_2_commercial': {
+                'position': {'x': 148.0, 'y': 75.0, 'z': 7.0},
+                'heightMeters': 14.0,
+                'floors': 4,
+                'structuralDamage': 'LOW',
+                'inspectionStatus': 'UNINSPECTED',
+                'accessibleOpenings': [
+                    {'openingId': 'glass_facade_fl2', 'floorLevel': 2, 'dimensionsMeters': [10.0, 2.5], 'isObstructed': False, 'detectedOccupants': 0, 'openingType': 'WINDOW', 'inspectionConfidence': 0.0, 'position': {'x': 148.0, 'y': 74.0, 'z': 7.0}}
+                ],
+                'inspectionDrones': [],
+                'surveyedAngles': [],
+                'last_push_time': 0.0
+            }
+        }
+
         # Subscribe to all 3 drones simultaneously
         for d_name in ['drone_1', 'drone_2', 'drone_3']:
             self.create_subscription(
@@ -161,6 +192,131 @@ class MultiSpectralPerceptionNode(Node):
         # 20 Hz Perception Loop
         self.timer = self.create_timer(0.05, self.process_multispectral_pipeline)
         self.get_logger().info(f" Multi-Spectral Video Stream LIVE on http://localhost:{STREAM_PORT}/video_feed")
+
+    def run_building_inspection_check(self):
+        curr_time = time.time()
+        for b_name, b_data in self.buildings.items():
+            b_pos = b_data['position']
+            inspecting_drones_this_tick = []
+            
+            # Check proximity for each drone
+            for d_name, d_val in self.drones.items():
+                if d_val['odom'] is None:
+                    continue
+                d_pos = d_val['odom']
+                
+                # Compute 3D distance
+                dx = d_pos.x - b_pos['x']
+                dy = d_pos.y - b_pos['y']
+                dz = d_pos.z - b_pos['z']
+                dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+                
+                # Proximity threshold for building inspection: 25.0 meters
+                if dist < 25.0:
+                    inspecting_drones_this_tick.append(d_name.upper())
+                    
+                    # Classify relative yaw angle into cardinal survey sectors
+                    theta_rad = math.atan2(d_pos.y - b_pos['y'], d_pos.x - b_pos['x'])
+                    theta_deg = math.degrees(theta_rad)
+                    if 45.0 <= theta_deg < 135.0:
+                        sector = 'NORTH'
+                    elif -45.0 <= theta_deg < 45.0:
+                        sector = 'EAST'
+                    elif -135.0 <= theta_deg < -45.0:
+                        sector = 'SOUTH'
+                    else:
+                        sector = 'WEST'
+                    
+                    if sector not in b_data['surveyedAngles']:
+                        b_data['surveyedAngles'].append(sector)
+                        self.get_logger().info(f" [ANGLE] Drone {d_name.upper()} surveyed {b_name} from {sector} sector (Relative angle: {theta_deg:.1f}deg)")
+
+                    # Update openings' inspection confidence
+                    for opening in b_data['accessibleOpenings']:
+                        op_pos = opening.get('position', b_pos)
+                        op_dx = d_pos.x - op_pos['x']
+                        op_dy = d_pos.y - op_pos['y']
+                        op_dz = d_pos.z - op_pos['z']
+                        op_dist = math.sqrt(op_dx*op_dx + op_dy*op_dy + op_dz*op_dz)
+                        
+                        # within 20 meters of opening
+                        if op_dist < 20.0:
+                            opening['inspectionConfidence'] = min(1.0, opening['inspectionConfidence'] + 0.02)
+            
+            # Calculate estimated occupancy probability (No concrete X-ray)
+            p_base = 0.30
+            if b_data['structuralDamage'] == 'MODERATE':
+                p_base = 0.60
+            elif b_data['structuralDamage'] == 'SEVERE_COLLAPSE':
+                p_base = 0.80
+
+            p_det = 0.0
+            p_vent = 0.0
+            
+            for op in b_data['accessibleOpenings']:
+                if op['inspectionConfidence'] > 0.40:
+                    # Incrementally count venting signatures
+                    p_vent += 0.08 if op['isObstructed'] else 0.12
+                    # Simulate occupant signatures detected near window/balcony
+                    if op['inspectionConfidence'] > 0.80:
+                        op['detectedOccupants'] = 1
+                        p_det = 0.15
+
+            occupancy_prob = min(0.99, p_base + p_det + p_vent)
+            b_data['estimatedOccupancyProbability'] = occupancy_prob
+
+            # Update status
+            if inspecting_drones_this_tick:
+                for d in inspecting_drones_this_tick:
+                    if d not in b_data['inspectionDrones']:
+                        b_data['inspectionDrones'].append(d)
+                
+                if b_data['inspectionStatus'] == 'UNINSPECTED':
+                    b_data['inspectionStatus'] = 'IN_PROGRESS'
+                    self.get_logger().info(f" [BUILDING IN_PROGRESS] Drones {inspecting_drones_this_tick} inspecting {b_name}")
+                
+                # Check if all openings are fully scanned
+                all_scanned = True
+                for op in b_data['accessibleOpenings']:
+                    if op['inspectionConfidence'] < 0.90:
+                        all_scanned = False
+                        break
+                
+                has_enough_angles = len(b_data['surveyedAngles']) >= 3
+                
+                if all_scanned and has_enough_angles and b_data['inspectionStatus'] != 'COMPLETED':
+                    b_data['inspectionStatus'] = 'COMPLETED'
+                    self.get_logger().info(f" [BUILDING COMPLETED] Fully inspected building: {b_name} across surveyed sectors: {b_data['surveyedAngles']}!")
+            
+            # Push updates to NestJS API (every 2s or status change)
+            if inspecting_drones_this_tick or b_data['inspectionStatus'] != 'UNINSPECTED':
+                if curr_time - b_data['last_push_time'] > 2.0:
+                    b_data['last_push_time'] = curr_time
+                    self.get_logger().info(f" [OCCUPANCY] Building {b_name} occupancy probability: {occupancy_prob*100:.1f}% (Base: {p_base:.2f}, Venting: {p_vent:.2f}, Detected: {p_det:.2f})")
+                    payload = {
+                        "structuralDamage": b_data['structuralDamage'],
+                        "inspectionStatus": b_data['inspectionStatus'],
+                        "surveyedAngles": b_data['surveyedAngles'],
+                        "estimatedOccupancyProbability": round(occupancy_prob, 2),
+                        "accessibleOpenings": [
+                            {
+                                "openingId": op['openingId'],
+                                "floorLevel": op['floorLevel'],
+                                "dimensionsMeters": op['dimensionsMeters'],
+                                "isObstructed": op['isObstructed'],
+                                "detectedOccupants": op['detectedOccupants'],
+                                "openingType": op['openingType'],
+                                "inspectionConfidence": round(op['inspectionConfidence'], 2),
+                                "position": op['position']
+                            }
+                            for op in b_data['accessibleOpenings']
+                        ]
+                    }
+                    try:
+                        url = f"{BACKEND_URL}/buildings/{b_name}/inspection"
+                        requests.post(url, json=payload, timeout=0.8)
+                    except Exception:
+                        pass
 
     def rgb_callback(self, msg, drone_name):
         try:
@@ -182,6 +338,8 @@ class MultiSpectralPerceptionNode(Node):
         self.drones[drone_name]['yaw'] = math.atan2(siny_cosp, cosy_cosp)
 
     def process_multispectral_pipeline(self):
+        # Update building inspection states
+        self.run_building_inspection_check()
         global latest_hud_jpeg, active_drone_selected
         
         with lock:
