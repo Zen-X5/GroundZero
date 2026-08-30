@@ -61,6 +61,12 @@ export class Drone {
 
   @Prop({ type: Number, min: 0, max: 100, default: 0 })
   coveragePercentage: number;
+
+  @Prop({ type: [String], default: [] })
+  connectedPeers: string[];
+
+  @Prop({ type: Boolean, default: false })
+  isRelayActive: boolean;
 }
 
 export const DroneSchema = SchemaFactory.createForClass(Drone);

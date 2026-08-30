@@ -27,6 +27,9 @@ export class MeshLink {
 
   @Prop({ required: true, type: Boolean, default: false })
   hasGroundPath: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  isActiveRoutingPath: boolean;
 }
 
 export const MeshLinkSchema = SchemaFactory.createForClass(MeshLink);

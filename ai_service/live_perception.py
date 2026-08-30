@@ -144,6 +144,7 @@ class MultiSpectralPerceptionNode(Node):
         self.last_detection_push_time = 0
         self.last_telemetry_push_time = 0
         self.known_survivors = set()
+        self.edge_cache = [] # local cache queue for isolated links
 
         # Subscribe to all 3 drones simultaneously
         for d_name in ['drone_1', 'drone_2', 'drone_3']:
@@ -314,13 +315,36 @@ class MultiSpectralPerceptionNode(Node):
                 "confirmingDrones": [current_d.upper()]
             }
 
+            # Verify connectivity to Ground Base Station
+            is_connected = True
             try:
-                requests.post(f"{BACKEND_URL}/survivors/detection", json=payload, timeout=0.8)
-                if surv_code not in self.known_survivors:
-                    self.known_survivors.add(surv_code)
-                    self.get_logger().info(f" [NEW TARGET] Pushed {surv_code} at ({coords['x']}m, {coords['y']}m) with Risk {risk_val} to NestJS Backend!")
+                c_res = requests.get(f"{BACKEND_URL}/network/connectivity/{current_d.upper()}", timeout=0.3)
+                is_connected = c_res.json().get("isConnected", True)
             except Exception:
                 pass
+
+            if not is_connected:
+                # Isolated node: cache detection on the edge
+                self.edge_cache.append(payload)
+                self.get_logger().warn(f" [EDGE CACHE] Isolated link detected for {current_d.upper()}! Cached {surv_code} locally on edge. Queue size: {len(self.edge_cache)}")
+            else:
+                # Connected: Flush edge cache buffer first
+                if self.edge_cache:
+                    self.get_logger().info(f" [EDGE FLUSH] Mesh connection recovered! Flushing {len(self.edge_cache)} cached observations...")
+                    for cached in list(self.edge_cache):
+                        try:
+                            requests.post(f"{BACKEND_URL}/survivors/detection", json=cached, timeout=0.5)
+                            self.edge_cache.remove(cached)
+                        except Exception:
+                            pass
+                # Post the new observation
+                try:
+                    requests.post(f"{BACKEND_URL}/survivors/detection", json=payload, timeout=0.8)
+                    if surv_code not in self.known_survivors:
+                        self.known_survivors.add(surv_code)
+                        self.get_logger().info(f" [NEW TARGET] Pushed {surv_code} at ({coords['x']}m, {coords['y']}m) with Risk {risk_val} to NestJS Backend!")
+                except Exception:
+                    pass
 
         # 5. Continuous Swarm Telemetry Sync (every 0.5s)
         if curr_time - self.last_telemetry_push_time > 0.5:
